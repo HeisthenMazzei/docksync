@@ -1,0 +1,471 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<!-- Cabeçalho estilo Dashboard -->
+<div class="bg-gradient-to-r from-[#0B1A2A] to-[#1F3346] rounded-2xl p-6 sm:p-8 mb-6 sm:mb-8 shadow-lg relative overflow-hidden">
+    <div class="absolute top-0 right-0 w-64 h-64 bg-[#00AEEF] opacity-10 rounded-full blur-3xl"></div>
+    
+    <div class="relative z-10 flex flex-col md:flex-row justify-between items-center gap-4">
+        <div>
+            <h1 class="text-2xl sm:text-3xl font-bold text-white tracking-tight flex items-center gap-3">
+                <svg class="w-8 h-8 sm:w-9 sm:h-9 text-[#00AEEF]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
+                </svg>
+                Movimentação em Série
+            </h1>
+            <p class="text-gray-400 text-sm mt-2">Escaneie vários chassis e registre todos de uma vez.</p>
+        </div>
+        
+        <a href="{% url 'registrar_movimentacao' %}" class="flex items-center gap-2 text-sm font-medium text-white bg-white/10 hover:bg-white/20 border border-white/20 px-4 py-2 rounded-lg transition">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
+            Modo Individual
+        </a>
+    </div>
+</div>
+
+<div class="max-w-5xl mx-auto space-y-6">
+    
+    <!-- PASSO 1: Configuração comum -->
+    <div class="bg-white p-6 rounded-2xl shadow-md border border-gray-100">
+        <h2 class="text-lg font-bold text-[#0B1A2A] mb-4 flex items-center gap-2">
+            <span class="bg-[#00AEEF] text-white w-7 h-7 rounded-full flex items-center justify-center text-sm font-bold">1</span>
+            Configure uma vez para todos os chassis
+        </h2>
+        
+        <div class="space-y-4">
+            <!-- Tipo -->
+            <div>
+                <label class="block text-sm font-bold text-gray-700 mb-2">Tipo da Movimentação</label>
+                <select id="id_tipo" class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-[#00AEEF] outline-none">
+                    <option value="CHEGADA">Chegada (Entrada no Porto)</option>
+                    <option value="INTERNA">Movimentação Interna</option>
+                    <option value="SAIDA">Saída (Retirada do Porto)</option>
+                </select>
+            </div>
+
+            <!-- Setor de Destino -->
+            <div id="setores-container">
+                <label class="block text-sm font-bold text-gray-700 mb-2">Setor de Destino</label>
+                <select id="id_setor_destino" class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-[#00AEEF] outline-none">
+                    <option value="">Selecione um setor...</option>
+                    {% for setor in setores %}
+                    <option value="{{ setor.id }}">{{ setor.nome }} ({{ setor.codigo }})</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <!-- Trabalhador -->
+            <div>
+                <label class="block text-sm font-bold text-gray-700 mb-2">Trabalhador Portuário Responsável</label>
+                <select id="id_trabalhador" class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-[#00AEEF] outline-none">
+                    <option value="">-- Selecione o Trabalhador --</option>
+                    {% for t in trabalhadores %}
+                    <option value="{{ t.id }}">{{ t.nome_completo }} (Mat: {{ t.matricula }})</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+    </div>
+
+    <!-- PASSO 2: Adicionar chassis -->
+    <div class="bg-white p-6 rounded-2xl shadow-md border border-gray-100">
+        <h2 class="text-lg font-bold text-[#0B1A2A] mb-4 flex items-center gap-2">
+            <span class="bg-[#00AEEF] text-white w-7 h-7 rounded-full flex items-center justify-center text-sm font-bold">2</span>
+            Adicione os chassis (QR ou manual)
+        </h2>
+
+        <!-- Botão grande de escanear -->
+        <button type="button" id="btn-escanear" class="w-full bg-[#0B1A2A] hover:bg-[#1F3346] text-white py-5 rounded-xl font-bold text-lg shadow-md transition flex items-center justify-center gap-3 mb-4">
+            <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"/></svg>
+            📷 Escanear QR Code
+        </button>
+
+        <div id="scanner-container" class="hidden bg-black rounded-xl p-4 border-2 border-[#00AEEF] mb-4">
+            <div class="flex justify-between items-center mb-3">
+                <p class="text-white font-bold text-sm flex items-center gap-2">
+                    <span class="w-2 h-2 bg-red-500 rounded-full animate-pulse"></span>
+                    Escaneie vários chassis. A câmera fica aberta.
+                </p>
+                <button type="button" id="btn-fechar-scanner" class="text-white hover:text-red-400 transition">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+            </div>
+            <div id="reader" class="w-full rounded-lg overflow-hidden"></div>
+        </div>
+
+        <!-- Adição manual -->
+        <div class="bg-[#F5F7FA] border border-gray-200 p-4 rounded-xl">
+            <label class="block text-sm font-bold text-[#0B1A2A] mb-2">Adicionar manualmente</label>
+            <div class="flex gap-2">
+                <input type="text" id="input-manual" placeholder="Digite o chassi e aperte Enter" class="flex-grow border border-gray-300 rounded-lg px-4 py-3 font-mono focus:ring-2 focus:ring-[#00AEEF] outline-none uppercase">
+                <button type="button" id="btn-add-manual" class="bg-[#00AEEF] hover:bg-[#0091cc] text-white px-6 py-3 rounded-lg font-bold transition">Adicionar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- PASSO 3: Lista de chassis adicionados -->
+    <div class="bg-white p-6 rounded-2xl shadow-md border border-gray-100">
+        <h2 class="text-lg font-bold text-[#0B1A2A] mb-4 flex items-center justify-between">
+            <span class="flex items-center gap-2">
+                <span class="bg-[#00AEEF] text-white w-7 h-7 rounded-full flex items-center justify-center text-sm font-bold">3</span>
+                Chassis na lista
+            </span>
+            <span class="bg-[#00AEEF] text-white text-sm px-3 py-1 rounded-full font-bold">
+                <span id="contador">0</span> chassis
+            </span>
+        </h2>
+
+        <div id="lista-vazia" class="text-center py-8 text-gray-400">
+            <svg class="w-16 h-16 mx-auto mb-3 opacity-30" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"/>
+            </svg>
+            <p>Nenhum chassi adicionado ainda.</p>
+            <p class="text-xs mt-1">Escaneie o QR Code ou digite manualmente.</p>
+        </div>
+
+        <ul id="lista-chassis" class="space-y-2 hidden"></ul>
+    </div>
+
+    <!-- PASSO 4: Registrar todos -->
+    <div class="bg-[#0B1A2A] p-6 rounded-2xl shadow-lg">
+        <button type="button" id="btn-registrar-todos" disabled class="w-full bg-[#00AEEF] hover:bg-[#0091cc] disabled:bg-gray-500 disabled:cursor-not-allowed text-white py-5 rounded-xl font-bold text-lg shadow-md transition flex items-center justify-center gap-3">
+            <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+            Registrar Todos os Chassis
+        </button>
+        <p class="text-xs text-gray-400 text-center mt-3">Só é possível registrar se tipo, setor (quando aplicável) e trabalhador estiverem preenchidos.</p>
+    </div>
+
+    <!-- Área de resultados -->
+    <div id="resultados" class="hidden bg-white p-6 rounded-2xl shadow-md border border-gray-100">
+        <h2 class="text-lg font-bold text-[#0B1A2A] mb-4">Resultados</h2>
+        <div id="resultados-resumo" class="grid grid-cols-3 gap-3 mb-4"></div>
+        <div id="resultados-detalhes" class="space-y-2 max-h-96 overflow-y-auto"></div>
+    </div>
+
+</div>
+
+<!-- Lib do Scanner -->
+<script src="{% static 'js/html5-qrcode.min.js' %}"></script>
+
+<script>
+    function extrairChassi(texto) {
+        if (!texto) return '';
+        texto = texto.trim();
+        if (texto.startsWith('http://') || texto.startsWith('https://')) {
+            try {
+                const url = new URL(texto);
+                const partes = url.pathname.split('/').filter(Boolean);
+                return partes.length > 0 ? partes[partes.length - 1].trim() : '';
+            } catch (e) {
+                const partes = texto.split('/').filter(Boolean);
+                return partes.length > 0 ? partes[partes.length - 1].trim() : '';
+            }
+        }
+        return texto;
+    }
+
+    document.addEventListener("DOMContentLoaded", function() {
+        // ============================================
+        // ESTADO
+        // ============================================
+        let chassisAdicionados = [];
+        let html5QrCode = null;
+        let ultimoChassiLido = '';
+        let ultimoTempoLeitura = 0;
+
+        const COOLDOWN_MS = 2500; // Ignora o mesmo chassi lido em menos de 2.5s
+
+        // ============================================
+        // ELEMENTOS
+        // ============================================
+        const tipoSelect = document.getElementById('id_tipo');
+        const setoresContainer = document.getElementById('setores-container');
+        const setorDestinoSelect = document.getElementById('id_setor_destino');
+        const trabalhadorSelect = document.getElementById('id_trabalhador');
+        const inputManual = document.getElementById('input-manual');
+        const btnAddManual = document.getElementById('btn-add-manual');
+        const btnEscanear = document.getElementById('btn-escanear');
+        const btnFecharScanner = document.getElementById('btn-fechar-scanner');
+        const scannerContainer = document.getElementById('scanner-container');
+        const listaChassis = document.getElementById('lista-chassis');
+        const listaVazia = document.getElementById('lista-vazia');
+        const contador = document.getElementById('contador');
+        const btnRegistrarTodos = document.getElementById('btn-registrar-todos');
+        const resultadosBox = document.getElementById('resultados');
+        const resultadosResumo = document.getElementById('resultados-resumo');
+        const resultadosDetalhes = document.getElementById('resultados-detalhes');
+
+        // ============================================
+        // TOGGLE SETOR (por tipo)
+        // ============================================
+        function toggleSetores() {
+            if (tipoSelect.value === 'SAIDA') {
+                setoresContainer.style.display = 'none';
+            } else {
+                setoresContainer.style.display = 'block';
+            }
+            atualizarBotaoRegistrar();
+        }
+        tipoSelect.addEventListener('change', toggleSetores);
+        toggleSetores();
+
+        // ============================================
+        // ADICIONAR / REMOVER CHASSI
+        // ============================================
+        function adicionarChassi(chassiOriginal) {
+            const chassi = extrairChassi(chassiOriginal).toUpperCase().trim();
+            if (!chassi) return false;
+
+            if (chassiAdicionados.includes(chassi)) {
+                // Feedback visual duplicado
+                mostrarAviso(`⚠️ ${chassi} já está na lista`, 'warning');
+                return false;
+            }
+
+            chassisAdicionados.push(chassi);
+            renderLista();
+            return true;
+        }
+
+        function removerChassi(chassi) {
+            chassisAdicionados = chassisAdicionados.filter(c => c !== chassi);
+            renderLista();
+        }
+
+        function renderLista() {
+            contador.textContent = chassisAdicionados.length;
+            atualizarBotaoRegistrar();
+
+            if (chassisAdicionados.length === 0) {
+                listaChassis.classList.add('hidden');
+                listaVazia.classList.remove('hidden');
+                return;
+            }
+
+            listaVazia.classList.add('hidden');
+            listaChassis.classList.remove('hidden');
+            listaChassis.innerHTML = '';
+
+            chassisAdicionados.forEach((chassi, index) => {
+                const li = document.createElement('li');
+                li.className = 'flex items-center justify-between bg-gray-50 border border-gray-200 rounded-lg p-3 hover:bg-gray-100 transition';
+                li.innerHTML = `
+                    <div class="flex items-center gap-3">
+                        <span class="bg-[#0B1A2A] text-white w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold">${index + 1}</span>
+                        <span class="font-mono text-sm font-semibold text-[#0B1A2A]">${chassi}</span>
+                    </div>
+                    <button type="button" class="text-red-500 hover:text-red-700 transition p-2" data-chassi="${chassi}">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                        </svg>
+                    </button>
+                `;
+                li.querySelector('button').addEventListener('click', function() {
+                    removerChassi(this.dataset.chassi);
+                });
+                listaChassis.appendChild(li);
+            });
+        }
+
+        function atualizarBotaoRegistrar() {
+            const temChassis = chassisAdicionados.length > 0;
+            const temTrabalhador = trabalhadorSelect.value !== '';
+            const precisaSetor = tipoSelect.value !== 'SAIDA';
+            const temSetor = !precisaSetor || setorDestinoSelect.value !== '';
+
+            btnRegistrarTodos.disabled = !(temChassis && temTrabalhador && temSetor);
+        }
+
+        trabalhadorSelect.addEventListener('change', atualizarBotaoRegistrar);
+        setorDestinoSelect.addEventListener('change', atualizarBotaoRegistrar);
+
+        // ============================================
+        // AVISO TOAST
+        // ============================================
+        function mostrarAviso(mensagem, tipo = 'info') {
+            const cores = {
+                'warning': 'bg-yellow-500',
+                'success': 'bg-green-500',
+                'error': 'bg-red-500',
+                'info': 'bg-[#00AEEF]',
+            };
+            const toast = document.createElement('div');
+            toast.className = `fixed top-24 right-6 ${cores[tipo] || cores.info} text-white px-6 py-3 rounded-lg shadow-2xl font-bold z-[100] transition-all`;
+            toast.textContent = mensagem;
+            document.body.appendChild(toast);
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                setTimeout(() => toast.remove(), 300);
+            }, 1800);
+        }
+
+        // ============================================
+        // ADICIONAR MANUAL
+        // ============================================
+        btnAddManual.addEventListener('click', function() {
+            if (adicionarChassi(inputManual.value)) {
+                inputManual.value = '';
+                inputManual.focus();
+            }
+        });
+
+        inputManual.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                btnAddManual.click();
+            }
+        });
+
+        // ============================================
+        // SCANNER QR
+        // ============================================
+        btnEscanear.addEventListener('click', function() {
+            scannerContainer.classList.remove('hidden');
+            btnEscanear.classList.add('hidden');
+
+            if (!html5QrCode) {
+                html5QrCode = new Html5Qrcode("reader");
+            }
+
+            html5QrCode.start(
+                { facingMode: "environment" },
+                { fps: 10, qrbox: { width: 280, height: 280 } },
+                (decodedText) => {
+                    const chassi = extrairChassi(decodedText);
+                    const agora = Date.now();
+
+                    // Cooldown: ignora a mesma leitura repetida em < 2.5s
+                    if (chassi === ultimoChassiLido && (agora - ultimoTempoLeitura) < COOLDOWN_MS) {
+                        return;
+                    }
+                    ultimoChassiLido = chassi;
+                    ultimoTempoLeitura = agora;
+
+                    if (adicionarChassi(chassi)) {
+                        mostrarAviso(`✅ ${chassi} adicionado`, 'success');
+                    }
+                },
+                (errorMessage) => { /* ignorar erros contínuos */ }
+            ).catch(err => {
+                alert("Não foi possível acessar a câmera. Verifique as permissões do navegador.");
+                console.error(err);
+                scannerContainer.classList.add('hidden');
+                btnEscanear.classList.remove('hidden');
+            });
+        });
+
+        function pararScanner() {
+            if (html5QrCode && html5QrCode.isScanning) {
+                html5QrCode.stop().then(() => {
+                    scannerContainer.classList.add('hidden');
+                    btnEscanear.classList.remove('hidden');
+                }).catch(err => console.error(err));
+            } else {
+                scannerContainer.classList.add('hidden');
+                btnEscanear.classList.remove('hidden');
+            }
+        }
+
+        btnFecharScanner.addEventListener('click', pararScanner);
+
+        // ============================================
+        // REGISTRAR TODOS
+        // ============================================
+        btnRegistrarTodos.addEventListener('click', function() {
+            if (chassisAdicionados.length === 0) return;
+
+            const dados = new FormData();
+            dados.append('tipo', tipoSelect.value);
+            dados.append('setor_destino', setorDestinoSelect.value);
+            dados.append('trabalhador_id', trabalhadorSelect.value);
+            dados.append('chassis', JSON.stringify(chassisAdicionados));
+            dados.append('csrfmiddlewaretoken', '{{ csrf_token }}');
+
+            btnRegistrarTodos.disabled = true;
+            btnRegistrarTodos.innerHTML = `
+                <svg class="w-7 h-7 animate-spin" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                Processando...
+            `;
+
+            fetch("{% url 'registrar_movimentacao_lote' %}", {
+                method: 'POST',
+                body: dados,
+            })
+            .then(r => r.json())
+            .then(data => {
+                if (!data.sucesso) {
+                    mostrarAviso(`❌ ${data.erro}`, 'error');
+                    return;
+                }
+
+                mostrarResultados(data);
+
+                // Se houve sucessos, remove-os da lista
+                if (data.sucessos > 0) {
+                    const sucessoSet = new Set(
+                        data.resultados.filter(r => r.sucesso).map(r => r.chassi)
+                    );
+                    chassisAdicionados = chassisAdicionados.filter(c => !sucessoSet.has(c));
+                    renderLista();
+                }
+            })
+            .catch(err => {
+                mostrarAviso(`❌ Erro de comunicação: ${err}`, 'error');
+            })
+            .finally(() => {
+                btnRegistrarTodos.innerHTML = `
+                    <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                    Registrar Todos os Chassis
+                `;
+                atualizarBotaoRegistrar();
+            });
+        });
+
+        // ============================================
+        // EXIBIR RESULTADOS
+        // ============================================
+        function mostrarResultados(data) {
+            resultadosBox.classList.remove('hidden');
+
+            resultadosResumo.innerHTML = `
+                <div class="bg-[#0B1A2A] text-white p-4 rounded-xl text-center">
+                    <p class="text-xs opacity-80 uppercase">Total</p>
+                    <p class="text-2xl font-bold">${data.total}</p>
+                </div>
+                <div class="bg-green-500 text-white p-4 rounded-xl text-center">
+                    <p class="text-xs opacity-80 uppercase">Sucessos</p>
+                    <p class="text-2xl font-bold">${data.sucessos}</p>
+                </div>
+                <div class="bg-red-500 text-white p-4 rounded-xl text-center">
+                    <p class="text-xs opacity-80 uppercase">Erros</p>
+                    <p class="text-2xl font-bold">${data.erros}</p>
+                </div>
+            `;
+
+            resultadosDetalhes.innerHTML = '';
+            data.resultados.forEach(r => {
+                const div = document.createElement('div');
+                const cor = r.sucesso
+                    ? 'bg-green-50 border-green-200 text-green-800'
+                    : 'bg-red-50 border-red-200 text-red-800';
+                const icone = r.sucesso ? '✅' : '❌';
+                div.className = `flex items-center justify-between p-3 rounded-lg border ${cor}`;
+                div.innerHTML = `
+                    <span class="font-mono font-semibold text-sm">${icone} ${r.chassi}</span>
+                    <span class="text-xs font-medium">${r.mensagem}</span>
+                `;
+                resultadosDetalhes.appendChild(div);
+            });
+
+            resultadosBox.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // Inicial
+        renderLista();
+    });
+</script>
+{% endblock %}

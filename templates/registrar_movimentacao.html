@@ -1,0 +1,428 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<!-- Cabeçalho -->
+<div class="bg-gradient-to-r from-[#0B1A2A] to-[#1F3346] rounded-2xl p-5 sm:p-8 mb-6 sm:mb-8 shadow-lg relative overflow-hidden">
+    <div class="absolute top-0 right-0 w-64 h-64 bg-[#00AEEF] opacity-10 rounded-full blur-3xl"></div>
+    
+    <div class="relative z-10 flex flex-col md:flex-row justify-between items-center gap-4">
+        <h1 class="text-2xl sm:text-3xl font-bold text-white tracking-tight flex items-center gap-3 text-center md:text-left">
+            <svg class="w-7 h-7 sm:w-8 sm:h-8 text-[#00AEEF] shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h8m-8 4h8m-8 4h4M4 3h16a2 2 0 012 2v14a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2z"/>
+            </svg>
+            Registrar Movimentação
+        </h1>
+        
+        <a href="{% url 'registrar_movimentacao_lote' %}" class="flex items-center justify-center gap-2 text-sm font-bold text-[#0B1A2A] bg-white hover:bg-gray-100 px-4 py-2 rounded-lg transition shadow-md w-full md:w-auto">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
+            Modo em Série
+        </a>
+    </div>
+</div>
+
+<div class="max-w-4xl mx-auto bg-white p-4 sm:p-8 rounded-2xl shadow-md border border-gray-100">
+    {% if messages %}
+        {% for message in messages %}
+            <div class="p-4 mb-6 rounded-lg text-sm {% if message.tags == 'success' %}bg-green-100 text-green-700 border border-green-200{% else %}bg-red-100 text-red-700 border border-red-200{% endif %}">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <form method="post" enctype="multipart/form-data" class="space-y-6">
+        {% csrf_token %}
+
+        <!-- BUSCA RÁPIDA -->
+        <div class="bg-[#F5F7FA] border border-gray-200 p-4 sm:p-5 rounded-xl">
+            <label class="block text-sm font-bold text-[#0B1A2A] mb-3 flex items-center gap-2">
+                <svg class="w-5 h-5 text-[#00AEEF]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                Busca Rápida
+            </label>
+
+            <!-- Input -->
+            <input type="text" id="busca-rapida-chassi" placeholder="Digite o chassi ou escaneie o QR Code..." class="w-full border border-gray-300 rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-[#00AEEF] outline-none mb-3">
+
+            <!-- Botões: lado a lado no mobile, e cada um ocupa 50% -->
+            <div class="grid grid-cols-2 gap-2">
+                <button type="button" id="btn-buscar-rapido" class="bg-[#00AEEF] hover:bg-[#0091cc] text-white px-4 py-3 rounded-lg text-sm font-bold transition flex items-center justify-center gap-2">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                    Buscar
+                </button>
+                <button type="button" id="btn-escanear-qr" class="bg-[#0B1A2A] hover:bg-[#1F3346] text-white px-4 py-3 rounded-lg text-sm font-bold transition flex items-center justify-center gap-2">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"/></svg>
+                    Escanear QR
+                </button>
+            </div>
+
+            <div id="resultado-busca-rapida" class="text-sm text-gray-600 mt-3 hidden"></div>
+        </div>
+
+        <!-- Área do Scanner -->
+        <div id="scanner-container" class="hidden bg-black rounded-xl p-4 border-2 border-[#00AEEF]">
+            <div class="flex justify-between items-center mb-3">
+                <p class="text-white font-bold text-sm flex items-center gap-2">
+                    <span class="w-2 h-2 bg-red-500 rounded-full animate-pulse"></span>
+                    Apontando para o QR Code...
+                </p>
+                <button type="button" id="btn-fechar-scanner" class="text-white hover:text-red-400 transition">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+            </div>
+            <div id="reader" class="w-full rounded-lg overflow-hidden"></div>
+        </div>
+
+        <!-- Status Atual -->
+        <div id="status-atual-container" class="hidden bg-[#0B1A2A] text-white p-4 rounded-xl flex flex-col sm:flex-row justify-between items-center gap-3">
+            <div class="text-center sm:text-left">
+                <p class="text-xs opacity-80 uppercase tracking-wider">Status Atual do Veículo</p>
+                <p id="status-atual-texto" class="text-lg font-bold">--</p>
+            </div>
+            <div id="status-atual-badge" class="px-4 py-2 rounded-lg text-sm font-bold whitespace-nowrap">--</div>
+        </div>
+
+        <!-- Tipo de Movimentação -->
+        <div>
+            <label class="block text-sm font-bold text-gray-700 mb-2">Tipo da Movimentação</label>
+            <select name="tipo" id="id_tipo" class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-[#00AEEF] outline-none">
+                <option value="CHEGADA">Chegada (Entrada no Porto)</option>
+                <option value="INTERNA">Movimentação Interna</option>
+                <option value="SAIDA">Saída (Retirada do Porto)</option>
+            </select>
+            <p id="aviso-tipo" class="hidden text-xs text-orange-600 font-semibold mt-2 flex items-start gap-1">
+                <svg class="w-4 h-4 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                <span id="aviso-tipo-texto"></span>
+            </p>
+        </div>
+
+        <!-- Navio e Viagem -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
+            <div>
+                <label class="block text-sm font-bold text-gray-700 mb-2">1. Navio</label>
+                <select id="navio-select" name="navio_id" class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-[#00AEEF] outline-none">
+                    <option value="">-- Selecione o Navio --</option>
+                    {% for navio in navios %}
+                    <option value="{{ navio.id }}">{{ navio.nome }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div>
+                <label class="block text-sm font-bold text-gray-700 mb-2">2. Nº Programação</label>
+                <select id="viagem-select" name="viagem_id" class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-[#00AEEF] outline-none">
+                    <option value="">-- Selecione a Programação --</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- BL e Chassi -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
+            <div>
+                <label class="block text-sm font-bold text-gray-700 mb-2">3. BL</label>
+                <div class="flex gap-2 items-center">
+                    <select id="bl-select" name="bl" class="flex-grow w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-[#00AEEF] outline-none">
+                        <option value="">-- Selecione o BL --</option>
+                    </select>
+                    <button type="button" id="refresh-manifestos" class="px-4 py-3 bg-gray-100 text-gray-600 rounded-lg hover:bg-gray-200 transition" title="Atualizar BLs">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                    </button>
+                </div>
+            </div>
+            <div>
+                <label class="block text-sm font-bold text-gray-700 mb-2">4. Veículo (Chassi)</label>
+                <select id="carga-select" name="chassi" required class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-[#00AEEF] outline-none">
+                    <option value="">-- Selecione o Veículo --</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Setor de Destino -->
+        <div id="setores-container">
+            <label class="block text-sm font-bold text-gray-700 mb-2">Setor de Destino</label>
+            <select name="setor_destino" id="id_setor_destino" class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-[#00AEEF] outline-none">
+                <option value="">Selecione um setor...</option>
+                {% for setor in setores %}
+                <option value="{{ setor.id }}">{{ setor.nome }} ({{ setor.codigo }})</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <!-- GPS -->
+        <div>
+            <label class="block text-sm font-bold text-gray-700 mb-2">Localização do Veículo (GPS)</label>
+            <div class="flex flex-col sm:flex-row gap-2">
+                <input type="text" id="id_gps_visual" readonly placeholder="Coordenadas não capturadas" class="w-full border border-gray-300 rounded-lg px-4 py-3 bg-gray-50 text-gray-500 focus:outline-none">
+                <button type="button" id="btn-capturar-gps" class="btn-Docksync px-5 py-3 rounded-lg font-bold flex items-center justify-center gap-2 whitespace-nowrap">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 21a9 9 0 100-18 9 9 0 000 18zm0-11a2 2 0 100-4 2 2 0 000 4z"/></svg>
+                    Capturar GPS
+                </button>
+            </div>
+            <input type="hidden" name="latitude_destino" id="id_latitude_destino">
+            <input type="hidden" name="longitude_destino" id="id_longitude_destino">
+            <input type="hidden" name="localizacao_destino" id="id_localizacao_destino">
+            <p class="text-xs text-gray-400 mt-1">Clique no botão para obter a posição exata do aparelho.</p>
+        </div>
+
+        <!-- Trabalhador -->
+        <div>
+            <label class="block text-sm font-bold text-gray-700 mb-2">Trabalhador Portuário Responsável</label>
+            <select name="trabalhador_id" required class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-[#00AEEF] outline-none">
+                <option value="">-- Selecione o Trabalhador --</option>
+                {% for trabalhador in trabalhadores %}
+                <option value="{{ trabalhador.id }}">{{ trabalhador.nome_completo }} (Mat: {{ trabalhador.matricula }})</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <!-- Foto -->
+        <div>
+            <label class="block text-sm font-bold text-gray-700 mb-2">Foto do Chassi (Opcional)</label>
+            <input type="file" name="fotografia_chassi" accept="image/*" capture="environment" class="w-full text-sm text-gray-500 file:mr-4 file:py-3 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-[#00AEEF] hover:file:bg-blue-100">
+            <p class="text-xs text-gray-400 mt-1">Em dispositivos móveis, o botão acima abre a câmera.</p>
+        </div>
+
+        <!-- Botão de submit -->
+        <button type="submit" class="w-full btn-Docksync py-4 rounded-xl font-bold text-base sm:text-lg text-white shadow-md hover:shadow-lg transition flex items-center justify-center gap-2">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+            Registrar Movimentação
+        </button>
+    </form>
+</div>
+
+<!-- Lib do Scanner -->
+<script src="{% static 'js/html5-qrcode.min.js' %}"></script>
+
+<script>
+    function extrairChassi(texto) {
+        if (!texto) return '';
+        texto = texto.trim();
+        if (texto.startsWith('http://') || texto.startsWith('https://')) {
+            try {
+                const url = new URL(texto);
+                const partes = url.pathname.split('/').filter(Boolean);
+                return partes.length > 0 ? partes[partes.length - 1].trim() : '';
+            } catch (e) {
+                const partes = texto.split('/').filter(Boolean);
+                return partes.length > 0 ? partes[partes.length - 1].trim() : '';
+            }
+        }
+        return texto;
+    }
+
+    document.addEventListener("DOMContentLoaded", function() {
+        const btnBuscar = document.getElementById('btn-buscar-rapido');
+        const btnEscanear = document.getElementById('btn-escanear-qr');
+        const btnFecharScanner = document.getElementById('btn-fechar-scanner');
+        const scannerContainer = document.getElementById('scanner-container');
+        const chassiInput = document.getElementById('busca-rapida-chassi');
+        const resultadoDiv = document.getElementById('resultado-busca-rapida');
+        const navioSelect = document.getElementById('navio-select');
+        const viagemSelect = document.getElementById('viagem-select');
+        const blSelect = document.getElementById('bl-select');
+        const cargaSelect = document.getElementById('carga-select');
+        const tipoSelect = document.getElementById('id_tipo');
+        const statusContainer = document.getElementById('status-atual-container');
+        const statusTexto = document.getElementById('status-atual-texto');
+        const statusBadge = document.getElementById('status-atual-badge');
+        const avisoTipo = document.getElementById('aviso-tipo');
+        const avisoTipoTexto = document.getElementById('aviso-tipo-texto');
+
+        let html5QrCode = null;
+
+        function aplicarTiposPermitidos(tiposPermitidos, estaNoPatio) {
+            Array.from(tipoSelect.options).forEach(opt => {
+                opt.disabled = !tiposPermitidos.includes(opt.value);
+                opt.style.color = opt.disabled ? '#9CA3AF' : '';
+            });
+            tipoSelect.value = tiposPermitidos[0];
+            if (estaNoPatio) {
+                avisoTipo.classList.remove('hidden');
+                avisoTipoTexto.textContent = "Este veículo já está no porto. Apenas Movimentação Interna ou Saída estão disponíveis.";
+            } else {
+                avisoTipo.classList.remove('hidden');
+                avisoTipoTexto.textContent = "Este veículo ainda não chegou ao porto. Registre uma Chegada.";
+            }
+        }
+
+        async function buscarPorChassi(chassi) {
+            chassi = extrairChassi(chassi);
+            if (!chassi) return;
+            chassiInput.value = chassi;
+            resultadoDiv.classList.remove('hidden');
+            resultadoDiv.innerHTML = '<span class="text-gray-500">Buscando...</span>';
+
+            try {
+                const response = await fetch("{% url 'buscar_dados_por_chassi' %}?chassi=" + encodeURIComponent(chassi));
+                const data = await response.json();
+
+                if (data.erro) {
+                    resultadoDiv.innerHTML = `<span class="text-red-600">❌ ${data.erro}</span>`;
+                    statusContainer.classList.add('hidden');
+                    avisoTipo.classList.add('hidden');
+                    Array.from(tipoSelect.options).forEach(opt => { opt.disabled = false; opt.style.color = ''; });
+                    return;
+                }
+
+                navioSelect.value = data.navio_id;
+
+                await fetch("{% url 'carregar_viagens' %}?navio_id=" + data.navio_id)
+                    .then(res => res.text())
+                    .then(html => {
+                        viagemSelect.innerHTML = '<option value="">-- Selecione a Programação --</option>' + html;
+                        viagemSelect.value = data.viagem_id;
+                    });
+
+                await fetch("{% url 'carregar_bls' %}?viagem_id=" + data.viagem_id)
+                    .then(res => res.text())
+                    .then(html => {
+                        blSelect.innerHTML = '<option value="">-- Selecione o BL --</option>' + html;
+                        blSelect.value = data.bl;
+                    });
+
+                await fetch("{% url 'carregar_cargas' %}?bl=" + encodeURIComponent(data.bl))
+                    .then(res => res.text())
+                    .then(html => {
+                        cargaSelect.innerHTML = '<option value="">-- Selecione o Veículo --</option>' + html;
+                        cargaSelect.value = data.chassi;
+                    });
+
+                statusContainer.classList.remove('hidden');
+                if (data.esta_no_patio) {
+                    statusTexto.textContent = `No pátio: ${data.setor_origem_nome}`;
+                    statusBadge.textContent = '✅ NO PÁTIO';
+                    statusBadge.className = 'px-4 py-2 rounded-lg text-sm font-bold bg-green-500 text-white';
+                } else {
+                    statusTexto.textContent = 'Ainda não chegou ao porto';
+                    statusBadge.textContent = '⏳ FORA DO PÁTIO';
+                    statusBadge.className = 'px-4 py-2 rounded-lg text-sm font-bold bg-yellow-500 text-white';
+                }
+
+                aplicarTiposPermitidos(data.tipos_permitidos, data.esta_no_patio);
+
+                resultadoDiv.innerHTML = `
+                    <span class="text-green-700 font-semibold">✅ Carga encontrada!</span><br>
+                    <strong>Navio:</strong> ${data.navio_nome} | <strong>Programação:</strong> ${data.viagem_numero} | <strong>BL:</strong> ${data.bl} | <strong>Setor Atual:</strong> ${data.setor_origem_nome}
+                `;
+            } catch (error) {
+                resultadoDiv.innerHTML = `<span class="text-red-600">❌ Erro ao buscar dados.</span>`;
+            }
+        }
+
+        btnBuscar.addEventListener('click', function() {
+            buscarPorChassi(chassiInput.value);
+        });
+
+        chassiInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                buscarPorChassi(chassiInput.value);
+            }
+        });
+
+        btnEscanear.addEventListener('click', function() {
+            scannerContainer.classList.remove('hidden');
+            if (!html5QrCode) {
+                html5QrCode = new Html5Qrcode("reader");
+            }
+            html5QrCode.start(
+                { facingMode: "environment" },
+                { fps: 10, qrbox: { width: 250, height: 250 } },
+                (decodedText) => {
+                    const chassi = extrairChassi(decodedText);
+                    chassiInput.value = chassi;
+                    pararScanner();
+                    buscarPorChassi(chassi);
+                },
+                (errorMessage) => {}
+            ).catch(err => {
+                alert("Não foi possível acessar a câmera. Verifique as permissões do navegador.");
+                console.error(err);
+                scannerContainer.classList.add('hidden');
+            });
+        });
+
+        function pararScanner() {
+            if (html5QrCode && html5QrCode.isScanning) {
+                html5QrCode.stop().then(() => {
+                    scannerContainer.classList.add('hidden');
+                }).catch(err => console.error(err));
+            } else {
+                scannerContainer.classList.add('hidden');
+            }
+        }
+
+        btnFecharScanner.addEventListener('click', pararScanner);
+
+        function toggleSetores() {
+            const setoresContainer = document.getElementById('setores-container');
+            setoresContainer.style.display = (tipoSelect.value === 'SAIDA') ? 'none' : 'block';
+        }
+        tipoSelect.addEventListener('change', toggleSetores);
+        toggleSetores();
+
+        navioSelect.addEventListener('change', function() {
+            viagemSelect.innerHTML = '<option value="">-- Selecione a Programação --</option>';
+            blSelect.innerHTML = '<option value="">-- Selecione o BL --</option>';
+            cargaSelect.innerHTML = '<option value="">-- Selecione o Veículo --</option>';
+            if (navioSelect.value) {
+                fetch("{% url 'carregar_viagens' %}?navio_id=" + navioSelect.value)
+                    .then(response => response.text())
+                    .then(html => { viagemSelect.innerHTML = '<option value="">-- Selecione a Programação --</option>' + html; });
+            }
+        });
+
+        viagemSelect.addEventListener('change', function() {
+            blSelect.innerHTML = '<option value="">-- Selecione o BL --</option>';
+            cargaSelect.innerHTML = '<option value="">-- Selecione o Veículo --</option>';
+            if (viagemSelect.value) {
+                fetch("{% url 'carregar_bls' %}?viagem_id=" + viagemSelect.value)
+                    .then(response => response.text())
+                    .then(html => { blSelect.innerHTML = '<option value="">-- Selecione o BL --</option>' + html; });
+            }
+        });
+
+        blSelect.addEventListener('change', function() {
+            cargaSelect.innerHTML = '<option value="">-- Selecione o Veículo --</option>';
+            if (blSelect.value) {
+                fetch("{% url 'carregar_cargas' %}?bl=" + encodeURIComponent(blSelect.value))
+                    .then(response => response.text())
+                    .then(html => { cargaSelect.innerHTML = '<option value="">-- Selecione o Veículo --</option>' + html; });
+            }
+        });
+
+        const btnCapturar = document.getElementById('btn-capturar-gps');
+        const gpsVisual = document.getElementById('id_gps_visual');
+        const latInput = document.getElementById('id_latitude_destino');
+        const lngInput = document.getElementById('id_longitude_destino');
+        const locInput = document.getElementById('id_localizacao_destino');
+
+        btnCapturar.addEventListener('click', function() {
+            if (!navigator.geolocation) {
+                alert("Este navegador não suporta geolocalização.");
+                return;
+            }
+            btnCapturar.innerText = "Capturando...";
+            btnCapturar.disabled = true;
+            navigator.geolocation.getCurrentPosition(
+                function(position) {
+                    const lat = position.coords.latitude;
+                    const lng = position.coords.longitude;
+                    latInput.value = lat;
+                    lngInput.value = lng;
+                    locInput.value = `GPS: ${lat}, ${lng}`;
+                    gpsVisual.value = `${lat.toFixed(6)}, ${lng.toFixed(6)}`;
+                    gpsVisual.classList.remove('bg-gray-50', 'text-gray-500');
+                    gpsVisual.classList.add('bg-green-50', 'text-green-600', 'font-semibold');
+                    btnCapturar.innerText = "📍 GPS Capturado!";
+                    btnCapturar.disabled = false;
+                },
+                function(error) {
+                    alert("Não foi possível obter a localização. Verifique se o GPS está ativo e a permissão do navegador foi concedida.");
+                    btnCapturar.innerText = "📡 Capturar GPS";
+                    btnCapturar.disabled = false;
+                },
+                { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+            );
+        });
+    });
+</script>
+{% endblock %}

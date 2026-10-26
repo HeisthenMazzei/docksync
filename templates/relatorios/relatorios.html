@@ -1,0 +1,119 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<!-- Cabeçalho estilo Dashboard (Sem subtítulo) -->
+<div class="bg-gradient-to-r from-[#0B1A2A] to-[#1F3346] rounded-2xl p-8 mb-8 shadow-lg relative overflow-hidden">
+    <div class="absolute top-0 right-0 w-64 h-64 bg-[#00AEEF] opacity-10 rounded-full blur-3xl"></div>
+    
+    <div class="relative z-10">
+        <h1 class="text-3xl font-bold text-white tracking-tight flex items-center gap-3">
+            <svg class="w-9 h-9 text-[#00AEEF]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+            </svg>
+            Central de Relatórios
+        </h1>
+    </div>
+</div>
+
+<!-- Seção: Exportação para Excel -->
+<div class="bg-white rounded-2xl shadow-md border border-gray-100 p-8 mb-8 max-w-5xl mx-auto">
+    <h2 class="text-2xl font-bold text-[#0B1A2A] mb-6 flex items-center gap-3">
+        <svg class="w-7 h-7 text-[#00AEEF]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+        </svg>
+        Exportação para Excel
+    </h2>
+    
+    <form method="get" action="{% url 'exportar_excel' %}" class="space-y-5">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+            <div>
+                <label class="block text-base font-semibold text-gray-700 mb-2">Tipo de Relatório</label>
+                <select name="tipo" required class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-[#00AEEF] outline-none">
+                    <option value="movimentacoes">Movimentações</option>
+                    <option value="manifestos">Manifestos</option>
+                    <option value="cargas">Cargas</option>
+                </select>
+            </div>
+            <div>
+                <label class="block text-base font-semibold text-gray-700 mb-2">Data Início</label>
+                <input type="date" name="data_inicio" class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-[#00AEEF] outline-none">
+            </div>
+            <div>
+                <label class="block text-base font-semibold text-gray-700 mb-2">Data Fim</label>
+                <input type="date" name="data_fim" class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-[#00AEEF] outline-none">
+            </div>
+        </div>
+
+        <button type="submit" class="w-full bg-[#00AEEF] hover:bg-[#0091cc] text-white text-lg py-4 rounded-lg font-bold shadow-md transition flex items-center justify-center gap-3">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+            Gerar Excel
+        </button>
+    </form>
+</div>
+
+<!-- Seção: Relatórios em PDF (Grid de Cards Centralizado) -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-5xl mx-auto">
+    
+    <!-- Relatório de Ocupação do Pátio -->
+    <div class="bg-[#0B1A2A] p-8 rounded-2xl border border-[#1F3346] hover:border-[#00AEEF]/50 transition-all duration-300 flex flex-col justify-between shadow-lg">
+        <h3 class="text-2xl font-bold text-white mb-8 leading-snug text-center">Relatório de Ocupação do Pátio</h3>
+        <a href="{% url 'gerar_relatorio_pdf' %}" class="bg-red-500 hover:bg-red-600 text-white text-lg py-4 rounded-lg font-bold text-center transition flex items-center justify-center gap-3">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
+            Gerar PDF
+        </a>
+    </div>
+
+    <!-- Relatório de Saídas (Auditoria) -->
+    <div class="bg-[#0B1A2A] p-8 rounded-2xl border border-[#1F3346] hover:border-[#00AEEF]/50 transition-all duration-300 flex flex-col justify-between shadow-lg">
+        <h3 class="text-2xl font-bold text-white mb-8 leading-snug text-center">Relatório de Saídas (Auditoria)</h3>
+        <form method="get" action="{% url 'gerar_relatorio_saidas_pdf' %}" class="space-y-4">
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <input type="date" name="data_inicio" class="w-full bg-[#1F3346] border border-[#2F445E] rounded-lg px-4 py-3 text-white text-base focus:ring-2 focus:ring-[#00AEEF] outline-none">
+                </div>
+                <div>
+                    <input type="date" name="data_fim" class="w-full bg-[#1F3346] border border-[#2F445E] rounded-lg px-4 py-3 text-white text-base focus:ring-2 focus:ring-[#00AEEF] outline-none">
+                </div>
+            </div>
+            <button type="submit" class="w-full bg-red-500 hover:bg-red-600 text-white text-lg py-4 rounded-lg font-bold transition flex items-center justify-center gap-3">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
+                Gerar PDF de Saídas
+            </button>
+        </form>
+    </div>
+
+    <!-- Ocupação por Operador -->
+    <div class="bg-[#0B1A2A] p-8 rounded-2xl border border-[#1F3346] hover:border-[#00AEEF]/50 transition-all duration-300 flex flex-col justify-between shadow-lg">
+        <h3 class="text-2xl font-bold text-white mb-8 leading-snug text-center">Ocupação por Operador</h3>
+        <a href="{% url 'relatorio_ocupacao_operadores_pdf' %}" class="bg-blue-500 hover:bg-blue-600 text-white text-lg py-4 rounded-lg font-bold text-center transition flex items-center justify-center gap-3">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
+            Gerar PDF
+        </a>
+    </div>
+
+    <!-- Ranking de Modelos -->
+    <div class="bg-[#0B1A2A] p-8 rounded-2xl border border-[#1F3346] hover:border-[#00AEEF]/50 transition-all duration-300 flex flex-col justify-between shadow-lg">
+        <h3 class="text-2xl font-bold text-white mb-8 leading-snug text-center">Ranking de Modelos</h3>
+        <a href="{% url 'relatorio_ranking_modelos_pdf' %}" class="bg-blue-500 hover:bg-blue-600 text-white text-lg py-4 rounded-lg font-bold text-center transition flex items-center justify-center gap-3">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
+            Gerar PDF
+        </a>
+    </div>
+</div>
+
+<!-- Alerta de Prazos Excedentes (Centralizado) -->
+<div class="bg-[#0B1A2A] p-8 rounded-2xl border border-red-500/30 hover:border-red-500/60 transition-all duration-300 mt-8 shadow-lg max-w-5xl mx-auto">
+    <div class="flex flex-col md:flex-row justify-between items-center gap-6">
+        <div class="w-full">
+            <h3 class="text-2xl font-bold text-red-400 flex items-center justify-center gap-3">
+                <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                Prazos Excedentes
+            </h3>
+        </div>
+        <a href="{% url 'relatorio_prazos_excedentes_pdf' %}" class="bg-red-600 hover:bg-red-700 text-white text-lg px-8 py-4 rounded-lg font-bold transition shrink-0 flex items-center justify-center gap-3">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
+            Gerar PDF de Alertas
+        </a>
+    </div>
+</div>
+{% endblock %}

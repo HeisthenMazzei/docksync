@@ -1,0 +1,157 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="bg-gradient-to-r from-[#0B1A2A] to-[#1F3346] rounded-2xl p-6 sm:p-8 mb-6 sm:mb-8 shadow-lg relative overflow-hidden">
+    <div class="absolute top-0 right-0 w-64 h-64 bg-[#00AEEF] opacity-10 rounded-full blur-3xl"></div>
+    <div class="relative z-10">
+        <h1 class="text-2xl sm:text-3xl font-bold text-white tracking-tight flex items-center gap-3">
+            <svg class="w-8 h-8 sm:w-9 sm:h-9 text-[#00AEEF]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
+            </svg>
+            Importar PDF — Manifesto #{{ manifesto.id }}
+        </h1>
+        <p class="text-gray-400 text-sm mt-2">{{ manifesto.viagem.navio.nome }} — {{ manifesto.viagem.numero_viagem }}</p>
+    </div>
+</div>
+
+<div class="max-w-4xl mx-auto bg-white p-8 rounded-2xl shadow-md border border-gray-100">
+    {% if messages %}
+        {% for message in messages %}
+            <div class="p-4 mb-4 rounded-lg text-sm {% if message.tags == 'success' %}bg-green-100 text-green-700 border border-green-200{% elif message.tags == 'warning' %}bg-yellow-100 text-yellow-700 border border-yellow-200{% else %}bg-red-100 text-red-700 border border-red-200{% endif %}">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    {% if etapa == 'upload' %}
+    <!-- ============ ETAPA 1: UPLOAD ============ -->
+    <div class="bg-blue-50 border border-blue-200 p-4 rounded-xl mb-6">
+        <h4 class="text-sm font-bold text-blue-800 mb-2 flex items-center gap-2">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            Como funciona
+        </h4>
+        <ul class="text-xs text-blue-700 space-y-1">
+            <li>1. Envie o PDF do BL ou manifesto</li>
+            <li>2. O sistema tenta encontrar os VINs (chassis reais) no texto</li>
+            <li>3. Se encontrar, você confirma. Se não, cria <strong>chassis provisórios</strong></li>
+        </ul>
+    </div>
+
+    <form method="post" enctype="multipart/form-data" class="space-y-6">
+        {% csrf_token %}
+        <div>
+            <label class="block text-sm font-bold text-gray-700 mb-2">Arquivo PDF</label>
+            <input type="file" name="arquivo_pdf" accept=".pdf" required class="w-full text-sm text-gray-500 file:mr-4 file:py-3 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-[#00AEEF] hover:file:bg-blue-100">
+        </div>
+        <div class="flex gap-3">
+            <button type="submit" class="btn-Docksync px-6 py-3 rounded-lg font-bold shadow-md transition flex items-center gap-2">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                Analisar PDF
+            </button>
+            <a href="{% url 'manifesto_list' %}" class="px-6 py-3 rounded-lg font-bold text-gray-500 hover:bg-gray-100 transition">Cancelar</a>
+        </div>
+    </form>
+
+    {% elif etapa == 'preview' %}
+    <!-- ============ ETAPA 2: PREVIEW ============ -->
+
+    {% if dados.chassis %}
+        <!-- ✅ ACHOU VINs -->
+        <div class="bg-green-50 border border-green-200 p-5 rounded-xl mb-6">
+            <h3 class="text-lg font-bold text-green-800 mb-2 flex items-center gap-2">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                Encontrados {{ dados.chassis|length }} chassis no PDF!
+            </h3>
+            {% if dados.quantidade_detectada %}
+                <p class="text-sm text-green-700">Quantidade declarada no PDF: <strong>{{ dados.quantidade_detectada }}</strong></p>
+            {% endif %}
+        </div>
+
+        <form method="post" class="space-y-4">
+            {% csrf_token %}
+            <input type="hidden" name="acao" value="confirmar_vin">
+
+            <div class="bg-gray-50 p-4 rounded-xl border border-gray-200 max-h-96 overflow-y-auto">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                    {% for chassi in dados.chassis %}
+                    <label class="flex items-center gap-2 bg-white p-3 rounded-lg border border-gray-200 cursor-pointer hover:bg-blue-50 transition">
+                        <input type="checkbox" name="chassis_selecionados" value="{{ chassi }}" checked class="rounded text-[#00AEEF]">
+                        <span class="font-mono text-sm font-semibold text-[#0B1A2A]">{{ chassi }}</span>
+                    </label>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div class="flex gap-3 pt-2">
+                <button type="submit" class="btn-Docksync px-6 py-3 rounded-lg font-bold shadow-md transition flex items-center gap-2">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                    Confirmar e Criar Chassis
+                </button>
+                <a href="{% url 'importar_pdf' manifesto.id %}" class="px-6 py-3 rounded-lg font-bold text-gray-500 hover:bg-gray-100 transition">Voltar</a>
+            </div>
+        </form>
+
+    {% else %}
+        <!-- ❌ NÃO ACHOU VINs -->
+        <div class="bg-yellow-50 border border-yellow-200 p-5 rounded-xl mb-6">
+            <h3 class="text-lg font-bold text-yellow-800 mb-2 flex items-center gap-2">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                Nenhum VIN encontrado no PDF
+            </h3>
+            <p class="text-sm text-yellow-700 mt-2">
+                O PDF provavelmente não contém a lista de chassis (VINs).
+                {% if dados.tem_vin_list %}
+                    <br>⚠️ O PDF menciona <strong>"VIN LIST"</strong> mas ela pode estar em um anexo separado.
+                {% endif %}
+                <br>Você pode <strong>criar chassis provisórios</strong> agora e depois substituí-los pelos reais.
+            </p>
+        </div>
+
+        <form method="post" class="space-y-4">
+            {% csrf_token %}
+            <input type="hidden" name="acao" value="criar_provisorios">
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 mb-2">Modelo do Veículo</label>
+                    <select name="modelo_id" required class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-[#00AEEF] outline-none">
+                        <option value="">-- Selecione o Modelo --</option>
+                        {% for m in modelos %}
+                        <option value="{{ m.id }}">{{ m.fabricante }} {{ m.modelo }} ({{ m.ano }})</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 mb-2">Quantidade</label>
+                    <input type="number" name="quantidade" min="1"
+                           value="{{ dados.quantidade_detectada|default:'' }}"
+                           placeholder="Ex: 179" required
+                           class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-[#00AEEF] outline-none">
+                </div>
+            </div>
+
+            <div class="bg-gray-50 p-4 rounded-lg border border-gray-200 text-sm text-gray-600">
+                <p class="font-semibold mb-1">Padrão dos chassis provisórios:</p>
+                <code class="bg-[#0B1A2A] text-[#00AEEF] px-2 py-1 rounded text-xs font-mono">
+                    {{ manifesto.viagem.numero_viagem }}-{MODELO}-{ANO}-{001, 002, ...}
+                </code>
+            </div>
+
+            <div class="flex gap-3 pt-2">
+                <button type="submit" class="btn-Docksync px-6 py-3 rounded-lg font-bold shadow-md transition flex items-center gap-2">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                    Criar Chassis Provisórios
+                </button>
+                <a href="{% url 'importar_pdf' manifesto.id %}" class="px-6 py-3 rounded-lg font-bold text-gray-500 hover:bg-gray-100 transition">Voltar</a>
+            </div>
+        </form>
+
+        <!-- Texto extraído para debug -->
+        <details class="mt-6">
+            <summary class="cursor-pointer text-xs text-gray-500 hover:text-gray-700">Ver texto extraído do PDF</summary>
+            <pre class="mt-2 bg-gray-100 p-3 rounded text-xs overflow-x-auto whitespace-pre-wrap text-gray-700 max-h-64 overflow-y-auto">{{ dados.texto }}</pre>
+        </details>
+    {% endif %}
+    {% endif %}
+</div>
+{% endblock %}

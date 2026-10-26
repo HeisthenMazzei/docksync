@@ -1,0 +1,131 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<!-- Cabeçalho -->
+<div class="bg-gradient-to-r from-[#0B1A2A] to-[#1F3346] rounded-2xl p-6 sm:p-8 mb-6 sm:mb-8 shadow-lg relative overflow-hidden">
+    <div class="absolute top-0 right-0 w-64 h-64 bg-yellow-500 opacity-10 rounded-full blur-3xl"></div>
+    <div class="relative z-10 flex flex-col md:flex-row justify-between items-center gap-4">
+        <div>
+            <h1 class="text-2xl sm:text-3xl font-bold text-white tracking-tight flex items-center gap-3">
+                <svg class="w-8 h-8 sm:w-9 sm:h-9 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                </svg>
+                Substituir Chassis Provisórios
+            </h1>
+            <p class="text-gray-400 text-sm mt-2">Manifesto #{{ manifesto.id }} — {{ manifesto.viagem.navio.nome }} ({{ manifesto.viagem.numero_viagem }})</p>
+        </div>
+        <a href="{% url 'manifesto_list' %}" class="flex items-center gap-2 text-sm font-medium text-white bg-white/10 hover:bg-white/20 border border-white/20 px-4 py-2 rounded-lg transition">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
+            Voltar
+        </a>
+    </div>
+</div>
+
+<div class="max-w-5xl mx-auto space-y-6">
+    {% if messages %}
+        {% for message in messages %}
+            <div class="p-4 rounded-lg text-sm {% if message.tags == 'success' %}bg-green-100 text-green-700 border border-green-200{% elif message.tags == 'warning' %}bg-yellow-100 text-yellow-700 border border-yellow-200{% else %}bg-red-100 text-red-700 border border-red-200{% endif %}">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <!-- Resumo -->
+    <div class="bg-white p-6 rounded-2xl shadow-md border border-gray-100">
+        <div class="flex items-center justify-between">
+            <div>
+                <p class="text-xs text-gray-500 uppercase tracking-wider">Total de Chassis Provisórios</p>
+                <p class="text-3xl font-bold text-yellow-600">{{ total }}</p>
+            </div>
+            <div class="text-right">
+                <p class="text-xs text-gray-500 uppercase tracking-wider">Padrão atual</p>
+                <code class="bg-[#0B1A2A] text-[#00AEEF] px-3 py-1 rounded text-xs font-mono">
+                    {{ manifesto.viagem.numero_viagem }}-XXXX-XXXX-XXX
+                </code>
+            </div>
+        </div>
+    </div>
+
+    {% if total > 0 %}
+    <!-- MODO 1: COLAR LISTA -->
+    <div class="bg-white p-6 rounded-2xl shadow-md border border-gray-100">
+        <h2 class="text-lg font-bold text-[#0B1A2A] mb-3 flex items-center gap-2">
+            <svg class="w-6 h-6 text-[#00AEEF]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+            </svg>
+            Modo Rápido — Colar Lista
+        </h2>
+        <p class="text-sm text-gray-500 mb-4">
+            Cole abaixo a lista de chassis reais (um por linha). Os chassis serão atribuídos <strong>na ordem</strong> da lista acima.
+            {% if total > 0 %}<br>Você tem <strong>{{ total }} chassis provisórios</strong> para substituir.{% endif %}
+        </p>
+
+        <form method="post" class="space-y-4">
+            {% csrf_token %}
+            <input type="hidden" name="modo" value="colar">
+            <textarea name="lista_colada" rows="10" placeholder="VIN001&#10;VIN002&#10;VIN003&#10;..."
+                      class="w-full border border-gray-300 rounded-lg px-4 py-3 font-mono text-sm focus:ring-2 focus:ring-[#00AEEF] outline-none"></textarea>
+            <button type="submit" class="btn-Docksync px-6 py-3 rounded-lg font-bold shadow-md transition flex items-center gap-2">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                Aplicar Lista em Ordem
+            </button>
+        </form>
+    </div>
+
+    <!-- MODO 2: INDIVIDUAL -->
+    <div class="bg-white p-6 rounded-2xl shadow-md border border-gray-100">
+        <h2 class="text-lg font-bold text-[#0B1A2A] mb-3 flex items-center gap-2">
+            <svg class="w-6 h-6 text-[#00AEEF]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+            </svg>
+            Modo Individual
+        </h2>
+        <p class="text-sm text-gray-500 mb-4">Edite um por um. Deixe em branco os que não quiser alterar agora.</p>
+
+        <form method="post" class="space-y-4">
+            {% csrf_token %}
+            <input type="hidden" name="modo" value="individual">
+
+            <div class="max-h-[600px] overflow-y-auto border border-gray-200 rounded-lg">
+                <table class="w-full text-left text-sm">
+                    <thead class="bg-[#0B1A2A] text-white sticky top-0">
+                        <tr>
+                            <th class="px-4 py-3 font-semibold">#</th>
+                            <th class="px-4 py-3 font-semibold">Chassi Provisório Atual</th>
+                            <th class="px-4 py-3 font-semibold">Novo Chassi (real)</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-100">
+                        {% for carga in provisorios %}
+                        <tr class="hover:bg-yellow-50/50 transition">
+                            <td class="px-4 py-3 text-xs text-gray-400 font-mono">{{ forloop.counter }}</td>
+                            <td class="px-4 py-3 font-mono text-xs">
+                                <span class="bg-yellow-100 text-yellow-800 px-2 py-1 rounded">{{ carga.chassi }}</span>
+                            </td>
+                            <td class="px-4 py-3">
+                                <input type="text" name="chassi_{{ carga.id }}" placeholder="VIN real"
+                                       class="w-full border border-gray-300 rounded-lg px-3 py-2 font-mono text-xs focus:ring-2 focus:ring-[#00AEEF] outline-none">
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <button type="submit" class="btn-Docksync px-6 py-3 rounded-lg font-bold shadow-md transition flex items-center gap-2">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                Salvar Todos
+            </button>
+        </form>
+    </div>
+    {% else %}
+    <div class="bg-green-50 border border-green-200 p-6 rounded-2xl text-center">
+        <svg class="w-12 h-12 mx-auto text-green-500 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+        </svg>
+        <h2 class="text-lg font-bold text-green-800">Tudo certo!</h2>
+        <p class="text-sm text-green-700 mt-1">Não há chassis provisórios neste manifesto.</p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

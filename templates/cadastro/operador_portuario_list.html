@@ -1,0 +1,87 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<!-- Cabeçalho estilo Dashboard -->
+<div class="bg-gradient-to-r from-[#0B1A2A] to-[#1F3346] rounded-2xl p-8 mb-8 shadow-lg relative overflow-hidden">
+    <div class="absolute top-0 right-0 w-64 h-64 bg-[#00AEEF] opacity-10 rounded-full blur-3xl"></div>
+    
+    <div class="relative z-10 flex flex-col md:flex-row justify-between items-center">
+        <h1 class="text-3xl font-bold text-white tracking-tight flex items-center gap-3">
+            <svg class="w-9 h-9 text-[#00AEEF]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
+            </svg>
+            Operadores Portuários
+        </h1>
+        
+        <a href="{% url 'operador_portuario_create' %}" class="flex items-center gap-2 bg-[#00AEEF] hover:bg-[#0091cc] text-white px-6 py-3 rounded-xl font-bold shadow-md transition mt-4 md:mt-0">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+            Cadastrar Operador
+        </a>
+    </div>
+</div>
+
+<!-- Card de Importação de Excel -->
+<div class="bg-white rounded-2xl shadow-md border border-gray-100 p-6 mb-8">
+    <h2 class="text-lg font-bold text-[#0B1A2A] mb-4 flex items-center gap-2">
+        <svg class="w-6 h-6 text-[#00AEEF]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+        Importar Operadores (Arquivo Excel)
+    </h2>
+    <p class="text-sm text-gray-500 mb-4">Envie a planilha com as colunas: <strong>Nome Empresa, CNPJ, Telefone, Responsável Técnico, Número, Data Validade, Situação</strong>.</p>
+    
+    <form method="post" action="{% url 'importar_operadores_arquivo' %}" enctype="multipart/form-data" class="flex flex-col sm:flex-row gap-4">
+        {% csrf_token %}
+        <div class="flex-grow">
+            <input type="file" name="arquivo_operadores" accept=".xls,.xlsx" required class="w-full text-sm text-gray-500 file:mr-4 file:py-3 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-[#00AEEF] hover:file:bg-blue-100">
+        </div>
+        <button type="submit" class="bg-green-600 hover:bg-green-700 text-white px-8 py-3 rounded-xl font-bold shadow-md transition flex items-center justify-center gap-2">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+            Importar Excel
+        </button>
+    </form>
+</div>
+
+<!-- Tabela de Operadores -->
+<div class="bg-white rounded-2xl shadow-md border border-gray-100 overflow-hidden">
+    <div class="overflow-x-auto">
+        <table class="w-full text-left text-sm text-gray-600">
+            <thead class="bg-[#0B1A2A] text-white">
+                <tr>
+                    <th class="px-6 py-4 font-semibold">Nome da Empresa</th>
+                    <th class="px-6 py-4 font-semibold">CNPJ</th>
+                    <th class="px-6 py-4 font-semibold">Telefone</th>
+                    <th class="px-6 py-4 font-semibold">Responsável Técnico</th>
+                    <th class="px-6 py-4 font-semibold">Registro</th>
+                    <th class="px-6 py-4 font-semibold">Situação</th>
+                    <th class="px-6 py-4 font-semibold text-center">Ações</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-100">
+                {% for operador in operadores %}
+                <tr class="hover:bg-gray-50 transition">
+                    <td class="px-6 py-4 font-semibold text-[#0B1A2A]">{{ operador.nome_empresa }}</td>
+                    <td class="px-6 py-4">{{ operador.cnpj|default:"-" }}</td>
+                    <td class="px-6 py-4">{{ operador.telefone|default:"-" }}</td>
+                    <td class="px-6 py-4">{{ operador.responsavel_tecnico|default:"-" }}</td>
+                    <td class="px-6 py-4">{{ operador.numero_registro|default:"-" }}</td>
+                    <td class="px-6 py-4">
+                        {% if operador.situacao == 'Ativo' %}
+                            <span class="bg-green-100 text-green-700 px-3 py-1 rounded-lg text-xs font-semibold">{{ operador.situacao }}</span>
+                        {% else %}
+                            <span class="bg-gray-100 text-gray-600 px-3 py-1 rounded-lg text-xs font-semibold">{{ operador.situacao|default:"-" }}</span>
+                        {% endif %}
+                    </td>
+                    <td class="px-6 py-4 text-center">
+                        <a href="{% url 'operador_portuario_update' operador.id %}" class="inline-block bg-blue-50 text-blue-600 px-4 py-2 rounded-lg hover:bg-blue-100 transition font-semibold text-xs">Editar</a>
+                        <a href="{% url 'operador_portuario_delete' operador.id %}" class="inline-block bg-red-50 text-red-600 px-4 py-2 rounded-lg hover:bg-red-100 transition font-semibold text-xs">Excluir</a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="7" class="px-6 py-8 text-center text-gray-400">Nenhum operador portuário cadastrado ainda.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

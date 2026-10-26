@@ -1,0 +1,86 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<!-- Cabeçalho -->
+<div class="bg-gradient-to-r from-[#0B1A2A] to-[#1F3346] rounded-2xl p-6 sm:p-8 mb-6 sm:mb-8 shadow-lg relative overflow-hidden">
+    <div class="absolute top-0 right-0 w-64 h-64 bg-[#00AEEF] opacity-10 rounded-full blur-3xl"></div>
+    
+    <div class="relative z-10">
+        <h1 class="text-2xl sm:text-3xl font-bold text-white tracking-tight flex items-center gap-3">
+            <svg class="w-8 h-8 sm:w-9 sm:h-9 text-[#00AEEF]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+            </svg>
+            Importar Lista de Chassis
+        </h1>
+        <p class="text-gray-400 text-sm mt-2">Manifesto #{{ manifesto.id }} — {{ manifesto.viagem.navio.nome }} ({{ manifesto.viagem.numero_viagem }})</p>
+    </div>
+</div>
+
+<div class="max-w-3xl mx-auto bg-white p-8 rounded-2xl shadow-md border border-gray-100">
+    {% if messages %}
+        {% for message in messages %}
+            <div class="p-4 mb-4 rounded-lg text-sm {% if message.tags == 'success' %}bg-green-100 text-green-700 border border-green-200{% elif message.tags == 'warning' %}bg-yellow-100 text-yellow-700 border border-yellow-200{% else %}bg-red-100 text-red-700 border border-red-200{% endif %}">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <!-- Informações do Manifesto -->
+    <div class="bg-[#F5F7FA] border border-gray-200 p-5 rounded-xl mb-6">
+        <h3 class="text-sm font-bold text-[#0B1A2A] mb-3 flex items-center gap-2">
+            <svg class="w-5 h-5 text-[#00AEEF]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6M9 8h6M5 3h14a2 2 0 012 2v14a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2z"/></svg>
+            Informações do Manifesto
+        </h3>
+        <div class="grid grid-cols-2 gap-3 text-sm">
+            <div>
+                <p class="text-gray-500 text-xs uppercase">Operador</p>
+                <p class="font-semibold text-[#0B1A2A]">{{ manifesto.operador.nome_empresa|default:"-" }}</p>
+            </div>
+            <div>
+                <p class="text-gray-500 text-xs uppercase">Fiel Depositário</p>
+                <p class="font-semibold text-[#0B1A2A]">{{ manifesto.dono_carga.nome_completo|default:"-" }}</p>
+            </div>
+            <div>
+                <p class="text-gray-500 text-xs uppercase">Cargas já cadastradas</p>
+                <p class="font-bold text-[#00AEEF]">{{ manifesto.cargas.count }}</p>
+            </div>
+            <div>
+                <p class="text-gray-500 text-xs uppercase">Previsão de Retirada</p>
+                <p class="font-semibold text-[#0B1A2A]">{{ manifesto.data_estimada_retirada|date:"d/m/Y"|default:"-" }}</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Formulário de Upload -->
+    <form method="post" enctype="multipart/form-data" class="space-y-6">
+        {% csrf_token %}
+
+        <div class="bg-blue-50 border border-blue-200 p-4 rounded-xl">
+            <h4 class="text-sm font-bold text-blue-800 mb-2 flex items-center gap-2">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                Formatos aceitos
+            </h4>
+            <ul class="text-xs text-blue-700 space-y-1">
+                <li>• <strong>.txt</strong> — um chassi por linha</li>
+                <li>• <strong>.csv</strong> — um chassi por linha (com ou sem header)</li>
+                <li>• <strong>.xlsx / .xls</strong> — primeira coluna com os chassis</li>
+                <li>• Separadores aceitos: vírgula, ponto-e-vírgula, tabulação ou quebra de linha</li>
+                <li>• Linhas em branco ou com menos de 10 caracteres são ignoradas</li>
+            </ul>
+        </div>
+
+        <div>
+            <label class="block text-sm font-bold text-gray-700 mb-2">Arquivo com a lista de chassis</label>
+            <input type="file" name="arquivo" accept=".txt,.csv,.xlsx,.xls" required class="w-full text-sm text-gray-500 file:mr-4 file:py-3 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-[#00AEEF] hover:file:bg-blue-100">
+        </div>
+
+        <div class="flex gap-3 pt-2">
+            <button type="submit" class="btn-Docksync px-6 py-3 rounded-lg font-bold shadow-md transition flex items-center gap-2">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                Importar Chassis
+            </button>
+            <a href="{% url 'manifesto_list' %}" class="px-6 py-3 rounded-lg font-bold text-gray-500 hover:bg-gray-100 transition">Cancelar</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

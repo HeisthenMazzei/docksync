@@ -1,0 +1,120 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<!-- Cabeçalho estilo Dashboard -->
+<div class="bg-gradient-to-r from-[#0B1A2A] to-[#1F3346] rounded-2xl p-8 mb-8 shadow-lg relative overflow-hidden">
+    <div class="absolute top-0 right-0 w-64 h-64 bg-[#00AEEF] opacity-10 rounded-full blur-3xl"></div>
+    
+    <div class="relative z-10 flex flex-col md:flex-row justify-between items-center">
+        <h1 class="text-3xl font-bold text-white tracking-tight flex items-center gap-3">
+            <svg class="w-9 h-9 text-[#00AEEF]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17a2 2 0 11-4 0 2 2 0 014 0zM19 17a2 2 0 11-4 0 2 2 0 014 0zM3 9a2 2 0 012-2h.5M12 19h5m-9 0H5m12-4H7a2 2 0 01-2-2V7a2 2 0 012-2h3l2 3h5a2 2 0 012 2v6a2 2 0 01-2 2z"/>
+            </svg>
+            Gestão de Cargas
+        </h1>
+        
+        <a href="{% url 'carga_create' %}" class="flex items-center gap-2 bg-[#00AEEF] hover:bg-[#0091cc] text-white px-6 py-3 rounded-xl font-bold shadow-md transition mt-4 md:mt-0">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+            Adicionar Carga
+        </a>
+    </div>
+</div>
+
+<!-- Filtros -->
+<div class="bg-white rounded-2xl shadow-md border border-gray-100 p-6 mb-8">
+    <form method="get" class="grid grid-cols-1 md:grid-cols-5 gap-4">
+        <div>
+            <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Chassi</label>
+            <input type="text" name="chassi" value="{{ filtro_chassi }}" placeholder="Ex: CHASSI001" class="w-full border border-gray-300 rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-[#00AEEF] outline-none">
+        </div>
+        <div>
+            <label class="block text-xs font-bold text-gray-500 uppercase mb-1">BL</label>
+            <input type="text" name="bl" value="{{ filtro_bl }}" placeholder="Ex: BL-001" class="w-full border border-gray-300 rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-[#00AEEF] outline-none">
+        </div>
+        <div>
+            <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Operador</label>
+            <input type="text" name="operador" value="{{ filtro_operador }}" placeholder="Nome do Operador" class="w-full border border-gray-300 rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-[#00AEEF] outline-none">
+        </div>
+        <div>
+            <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Setor</label>
+            <input type="text" name="setor" value="{{ filtro_setor }}" placeholder="Ex: P1" class="w-full border border-gray-300 rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-[#00AEEF] outline-none">
+        </div>
+        <div class="flex items-end gap-2">
+            <button type="submit" class="bg-[#00AEEF] text-white px-6 py-3 rounded-lg text-sm font-semibold hover:bg-[#0091cc] transition flex-1 flex items-center justify-center gap-2">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"/></svg>
+                Filtrar
+            </button>
+            <a href="{% url 'carga_list' %}" class="bg-gray-100 text-gray-600 px-4 py-3 rounded-lg text-sm font-semibold hover:bg-gray-200 transition">Limpar</a>
+        </div>
+    </form>
+</div>
+
+<!-- Tabela de Cargas -->
+<div class="bg-white rounded-2xl shadow-md border border-gray-100 overflow-hidden">
+    <div class="overflow-x-auto">
+        <table class="w-full text-left text-sm text-gray-600">
+            <thead class="bg-[#0B1A2A] text-white">
+                <tr>
+                    <th class="px-6 py-4 font-semibold">
+                        <a href="?ordenar_por=chassi{% if request.GET.chassi %}&chassi={{ request.GET.chassi }}{% endif %}{% if request.GET.bl %}&bl={{ request.GET.bl }}{% endif %}{% if request.GET.operador %}&operador={{ request.GET.operador }}{% endif %}{% if request.GET.setor %}&setor={{ request.GET.setor }}{% endif %}" class="hover:text-[#00AEEF] transition">Chassi</a>
+                    </th>
+                    <th class="px-6 py-4 font-semibold">
+                        <a href="?ordenar_por=bl{% if request.GET.chassi %}&chassi={{ request.GET.chassi }}{% endif %}{% if request.GET.bl %}&bl={{ request.GET.bl }}{% endif %}{% if request.GET.operador %}&operador={{ request.GET.operador }}{% endif %}{% if request.GET.setor %}&setor={{ request.GET.setor }}{% endif %}" class="hover:text-[#00AEEF] transition">BL</a>
+                    </th>
+                    <th class="px-6 py-4 font-semibold">
+                        <a href="?ordenar_por=operador__nome_empresa{% if request.GET.chassi %}&chassi={{ request.GET.chassi }}{% endif %}{% if request.GET.bl %}&bl={{ request.GET.bl }}{% endif %}{% if request.GET.operador %}&operador={{ request.GET.operador }}{% endif %}{% if request.GET.setor %}&setor={{ request.GET.setor }}{% endif %}" class="hover:text-[#00AEEF] transition">Operador</a>
+                    </th>
+                    <th class="px-6 py-4 font-semibold">
+                        <a href="?ordenar_por=dono__nome_completo{% if request.GET.chassi %}&chassi={{ request.GET.chassi }}{% endif %}{% if request.GET.bl %}&bl={{ request.GET.bl }}{% endif %}{% if request.GET.operador %}&operador={{ request.GET.operador }}{% endif %}{% if request.GET.setor %}&setor={{ request.GET.setor }}{% endif %}" class="hover:text-[#00AEEF] transition">Fiel Depositário</a>
+                    </th>
+                    <th class="px-6 py-4 font-semibold">
+                        <a href="?ordenar_por=modelo__fabricante{% if request.GET.chassi %}&chassi={{ request.GET.chassi }}{% endif %}{% if request.GET.bl %}&bl={{ request.GET.bl }}{% endif %}{% if request.GET.operador %}&operador={{ request.GET.operador }}{% endif %}{% if request.GET.setor %}&setor={{ request.GET.setor }}{% endif %}" class="hover:text-[#00AEEF] transition">Modelo / Ano</a>
+                    </th>
+                    <th class="px-6 py-4 font-semibold">
+                        <a href="?ordenar_por=metragem_unitaria{% if request.GET.chassi %}&chassi={{ request.GET.chassi }}{% endif %}{% if request.GET.bl %}&bl={{ request.GET.bl }}{% endif %}{% if request.GET.operador %}&operador={{ request.GET.operador }}{% endif %}{% if request.GET.setor %}&setor={{ request.GET.setor }}{% endif %}" class="hover:text-[#00AEEF] transition">Metragem (m²)</a>
+                    </th>
+                    <th class="px-6 py-4 font-semibold">
+                        <a href="?ordenar_por=setor_atual__nome{% if request.GET.chassi %}&chassi={{ request.GET.chassi }}{% endif %}{% if request.GET.bl %}&bl={{ request.GET.bl }}{% endif %}{% if request.GET.operador %}&operador={{ request.GET.operador }}{% endif %}{% if request.GET.setor %}&setor={{ request.GET.setor }}{% endif %}" class="hover:text-[#00AEEF] transition">Localização</a>
+                    </th>
+                    <th class="px-6 py-4 font-semibold text-center">Ações</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-100">
+                {% for carga in cargas %}
+                <tr class="hover:bg-gray-50 transition">
+                    <td class="px-6 py-4 font-semibold text-[#0B1A2A]">{{ carga.chassi }}</td>
+                    <td class="px-6 py-4 font-bold text-[#00AEEF]">{{ carga.bl|default:"-" }}</td>
+                    <td class="px-6 py-4">{{ carga.operador.nome_empresa|default:"-" }}</td>
+                    <td class="px-6 py-4">{{ carga.dono.nome_completo|default:"-" }}</td>
+                    <td class="px-6 py-4">{% if carga.modelo %}{{ carga.modelo.fabricante }} {{ carga.modelo.modelo }} ({{ carga.modelo.ano }}){% else %}<span class="text-gray-400">Sem modelo</span>{% endif %}</td>
+                    <td class="px-6 py-4 bg-gray-50 font-bold text-[#00AEEF]">{{ carga.metragem_unitaria|floatformat:2 }}</td>
+                    <td class="px-6 py-4">{% if carga.setor_atual %}<span class="bg-green-100 text-green-700 px-3 py-1 rounded-lg text-xs font-semibold">{{ carga.setor_atual.nome }}</span>{% else %}<span class="bg-gray-100 text-gray-500 px-3 py-1 rounded-lg text-xs font-semibold">Sem setor</span>{% endif %}</td>
+                    <td class="px-6 py-4 text-center">
+                        <a href="{% url 'carga_detail' carga.id %}" class="inline-block bg-blue-50 text-blue-600 px-4 py-2 rounded-lg hover:bg-blue-100 transition font-semibold text-xs">Ver</a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="8" class="px-6 py-8 text-center text-gray-400">Nenhuma carga encontrada.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Paginação -->
+{% if is_paginated %}
+<div class="mt-6 flex justify-center">
+    <nav class="flex gap-2">
+        {% if page_obj.has_previous %}
+            <a href="?page={{ page_obj.previous_page_number }}{% if request.GET.chassi %}&chassi={{ request.GET.chassi }}{% endif %}{% if request.GET.bl %}&bl={{ request.GET.bl }}{% endif %}{% if request.GET.operador %}&operador={{ request.GET.operador }}{% endif %}{% if request.GET.setor %}&setor={{ request.GET.setor }}{% endif %}" class="px-4 py-2 bg-gray-100 rounded-lg text-gray-600 hover:bg-gray-200 transition">Anterior</a>
+        {% endif %}
+        <span class="px-4 py-2 bg-[#0B1A2A] text-white rounded-lg">Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span>
+        {% if page_obj.has_next %}
+            <a href="?page={{ page_obj.next_page_number }}{% if request.GET.chassi %}&chassi={{ request.GET.chassi }}{% endif %}{% if request.GET.bl %}&bl={{ request.GET.bl }}{% endif %}{% if request.GET.operador %}&operador={{ request.GET.operador }}{% endif %}{% if request.GET.setor %}&setor={{ request.GET.setor }}{% endif %}" class="px-4 py-2 bg-gray-100 rounded-lg text-gray-600 hover:bg-gray-200 transition">Próxima</a>
+        {% endif %}
+    </nav>
+</div>
+{% endif %}
+{% endblock %}

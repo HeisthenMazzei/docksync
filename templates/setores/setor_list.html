@@ -1,0 +1,57 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<!-- Cabeçalho estilo Dashboard -->
+<div class="bg-gradient-to-r from-[#0B1A2A] to-[#1F3346] rounded-2xl p-8 mb-8 shadow-lg relative overflow-hidden">
+    <div class="absolute top-0 right-0 w-64 h-64 bg-[#00AEEF] opacity-10 rounded-full blur-3xl"></div>
+    
+    <div class="relative z-10 flex flex-col md:flex-row justify-between items-center">
+        <h1 class="text-3xl font-bold text-white tracking-tight flex items-center gap-3">
+            <svg class="w-9 h-9 text-[#00AEEF]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
+            </svg>
+            Gestão de Setores
+        </h1>
+        
+        <a href="{% url 'setor_create' %}" class="flex items-center gap-2 bg-[#00AEEF] hover:bg-[#0091cc] text-white px-6 py-3 rounded-xl font-bold shadow-md transition mt-4 md:mt-0">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+            Adicionar Setor
+        </a>
+    </div>
+</div>
+
+<!-- Tabela de Setores -->
+<div class="bg-white rounded-2xl shadow-md border border-gray-100 overflow-hidden">
+    <div class="overflow-x-auto">
+        <table class="w-full text-left text-sm text-gray-600">
+            <thead class="bg-[#0B1A2A] text-white">
+                <tr>
+                    <th class="px-6 py-4 font-semibold">Código</th>
+                    <th class="px-6 py-4 font-semibold">Nome</th>
+                    <th class="px-6 py-4 font-semibold">Setor Pai</th>
+                    <th class="px-6 py-4 font-semibold">Capacidade (m²)</th>
+                    <th class="px-6 py-4 font-semibold text-center">Ações</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-100">
+                {% for setor in setores %}
+                <tr class="hover:bg-gray-50 transition">
+                    <td class="px-6 py-4 font-semibold text-[#0B1A2A]">{{ setor.codigo }}</td>
+                    <td class="px-6 py-4">{{ setor.nome }}</td>
+                    <td class="px-6 py-4">{{ setor.setor_pai.nome|default:"-" }}</td>
+                    <td class="px-6 py-4 font-bold text-[#00AEEF]">{{ setor.capacidade_metragem|floatformat:2 }}</td>
+                    <td class="px-6 py-4 text-center">
+                        <a href="{% url 'setor_update' setor.id %}" class="inline-block bg-blue-50 text-blue-600 px-4 py-2 rounded-lg hover:bg-blue-100 transition font-semibold text-xs">Editar</a>
+                        <a href="{% url 'setor_delete' setor.id %}" class="inline-block bg-red-50 text-red-600 px-4 py-2 rounded-lg hover:bg-red-100 transition font-semibold text-xs">Excluir</a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="5" class="px-6 py-8 text-center text-gray-400">Nenhum setor cadastrado ainda.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

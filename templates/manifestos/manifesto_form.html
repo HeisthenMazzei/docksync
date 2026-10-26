@@ -1,0 +1,351 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto bg-white p-8 rounded-xl shadow-md border border-gray-100">
+    <h2 class="text-2xl font-bold text-[#0B1A2A] mb-6">➕ Adicionar Novo Manifesto</h2>
+    
+    <form method="post" class="space-y-4" id="manifestoForm">
+        {% csrf_token %}
+        
+        <div class="grid grid-cols-2 gap-4">
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Viagem (Navio)</label>
+                <select name="viagem" required class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-[#00AEEF] outline-none">
+                    <option value="">-- Selecione a Viagem --</option>
+                    {% for viagem in form.viagem.field.queryset %}
+                        {% if object and object.viagem_id == viagem.id %}
+                            <option value="{{ viagem.id }}" selected>{{ viagem.navio.nome }} - {{ viagem.numero_viagem }}</option>
+                        {% else %}
+                            <option value="{{ viagem.id }}">{{ viagem.navio.nome }} - {{ viagem.numero_viagem }}</option>
+                        {% endif %}
+                    {% endfor %}
+                </select>
+            </div>
+            
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Operador Portuário</label>
+                <select name="operador" class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-[#00AEEF] outline-none">
+                    <option value="">-- Selecione o Operador --</option>
+                    {% for operador in operadores %}
+                        {% if object and object.operador_id == operador.id %}
+                            <option value="{{ operador.id }}" selected>{{ operador.nome_empresa }} ({{ operador.cnpj }})</option>
+                        {% else %}
+                            <option value="{{ operador.id }}">{{ operador.nome_empresa }} ({{ operador.cnpj }})</option>
+                        {% endif %}
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+
+        <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Fiel Depositário</label>
+            <select name="dono_carga" required class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-[#00AEEF] outline-none">
+                <option value="">-- Selecione o Fiel --</option>
+                {% for dono in donos %}
+                    {% if object and object.dono_carga_id == dono.id %}
+                        <option value="{{ dono.id }}" selected>{{ dono.nome_completo }} (Mat: {{ dono.matricula }})</option>
+                    {% else %}
+                        <option value="{{ dono.id }}">{{ dono.nome_completo }} (Mat: {{ dono.matricula }})</option>
+                    {% endif %}
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="grid grid-cols-2 gap-4">
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Previsão de Saída</label>
+                <input type="date" name="data_estimada_retirada" value="{{ object.data_estimada_retirada|date:'Y-m-d'|default:'' }}" class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-[#00AEEF] outline-none">
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Data Real de Saída (Opcional)</label>
+                <input type="date" name="data_real_retirada" value="{{ object.data_real_retirada|date:'Y-m-d'|default:'' }}" class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-[#00AEEF] outline-none">
+            </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-4">
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Número de Veículos (Automático)</label>
+                <input type="number" name="numero_veiculos" id="id_numero_veiculos" readonly class="w-full border border-gray-300 rounded-lg px-4 py-2 bg-gray-100 text-gray-500 focus:outline-none" value="{{ object.numero_veiculos|default:0 }}">
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Metragem Total (m²) (Automático)</label>
+                <input type="number" step="0.01" name="metragem_total" id="id_metragem_total" readonly class="w-full border border-gray-300 rounded-lg px-4 py-2 bg-gray-100 text-gray-500 focus:outline-none" value="{{ object.metragem_total|default:'0.00' }}">
+            </div>
+        </div>
+
+        <div class="bg-gray-50 p-4 rounded-lg border border-gray-200">
+            <h3 class="text-lg font-semibold text-[#0B1A2A] mb-4">📦 Itens do Manifesto</h3>
+            
+            <div id="itens-container">
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-2 p-4 bg-white rounded-lg border border-gray-200">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Nº BL (Obrigatório)</label>
+                        <input type="text" name="bl" required class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-[#00AEEF] outline-none" placeholder="Ex: BL-001">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Marca / Modelo</label>
+                        <select name="modelo_id" class="modelo-select w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-[#00AEEF] outline-none">
+                            <option value="">-- Selecione --</option>
+                            {% for modelo in modelos %}
+                            <option value="{{ modelo.id }}" data-metragem="{{ modelo.metragem_m2 }}">{{ modelo.fabricante }} {{ modelo.modelo }} ({{ modelo.ano }}) - {{ modelo.metragem_m2 }} m²</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Quantidade</label>
+                        <input type="number" name="quantidade" min="1" value="1" class="qtd-input w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-[#00AEEF] outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Chassi (separar por vírgula ou linha)</label>
+                        <textarea name="lista_chassis" rows="2" class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-[#00AEEF] outline-none" placeholder="CHASSI001, CHASSI002&#10;CHASSI003"></textarea>
+                    </div>
+                </div>
+            </div>
+
+            <button type="button" id="add-item" class="mt-2 text-sm font-semibold text-[#00AEEF] hover:text-[#0091cc] transition">+ Adicionar outro modelo</button>
+        </div>
+
+        <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Status</label>
+            <select name="status" class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-[#00AEEF] outline-none">
+                <option value="AGUARDANDO">Aguardando</option>
+                <option value="EM_ANDAMENTO">Em Andamento</option>
+                <option value="CONCLUIDO">Concluído</option>
+            </select>
+        </div>
+
+        <div class="flex gap-4 pt-4">
+            <button type="submit" class="btn-Docksync px-6 py-3 rounded-lg font-bold shadow-md transition">Salvar Manifesto</button>
+            <a href="{% url 'manifesto_list' %}" class="px-6 py-3 rounded-lg font-bold text-gray-500 hover:bg-gray-100 transition">Cancelar</a>
+        </div>
+    </form>
+</div>
+
+<!-- ============================================
+     MODAL DE PRÉ-VISUALIZAÇÃO
+     ============================================ -->
+<div id="previewModal" class="fixed inset-0 bg-black bg-opacity-60 hidden items-center justify-center z-50 p-4">
+    <div class="bg-white rounded-2xl shadow-2xl max-w-3xl w-full max-h-[90vh] overflow-hidden flex flex-col">
+        <div class="bg-gradient-to-r from-[#0B1A2A] to-[#1F3346] text-white p-6 flex justify-between items-center">
+            <h3 class="text-xl font-bold flex items-center gap-2">
+                <svg class="w-6 h-6 text-[#00AEEF]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                Pré-visualização do Manifesto
+            </h3>
+            <button type="button" onclick="fecharPreview()" class="text-white hover:text-red-300 transition">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+            </button>
+        </div>
+
+        <div class="p-6 overflow-y-auto flex-1" id="previewContent">
+            <!-- Preenchido via JS -->
+        </div>
+
+        <div class="bg-gray-50 p-4 border-t border-gray-200 flex justify-end gap-3">
+            <button type="button" onclick="fecharPreview()" class="px-6 py-3 rounded-lg font-semibold text-gray-700 hover:bg-gray-200 transition">Cancelar</button>
+            <button type="button" id="btnConfirmarSalvar" class="btn-Docksync px-6 py-3 rounded-lg font-bold shadow-md transition" disabled>
+                Confirmar e Salvar
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+    // ============ CÁLCULO DE TOTAIS ============
+    function calcularTotais() {
+        let totalVeiculos = 0;
+        let totalMetragem = 0;
+
+        document.querySelectorAll('#itens-container .grid').forEach(item => {
+            const select = item.querySelector('.modelo-select');
+            const qtdInput = item.querySelector('.qtd-input');
+
+            if (select && select.value) {
+                const metragem = parseFloat(select.options[select.selectedIndex].getAttribute('data-metragem')) || 0;
+                const qtd = parseInt(qtdInput.value) || 1;
+
+                totalVeiculos += qtd;
+                totalMetragem += metragem * qtd;
+            }
+        });
+
+        document.getElementById('id_numero_veiculos').value = totalVeiculos;
+        document.getElementById('id_metragem_total').value = totalMetragem.toFixed(2);
+    }
+
+    // ============ BIND DE EVENTOS ============
+    function bindEvents(item) {
+        const select = item.querySelector('.modelo-select');
+        const qtdInput = item.querySelector('.qtd-input');
+        
+        if (select) select.addEventListener('change', calcularTotais);
+        if (qtdInput) qtdInput.addEventListener('input', calcularTotais);
+    }
+
+    document.addEventListener("DOMContentLoaded", function() {
+        calcularTotais(); 
+
+        document.getElementById('add-item').addEventListener('click', function() {
+            const container = document.getElementById('itens-container');
+            const newItem = container.children[0].cloneNode(true);
+            newItem.querySelectorAll('input, textarea').forEach(el => el.value = '');
+            if (newItem.querySelector('select')) {
+                newItem.querySelector('select').selectedIndex = 0;
+            }
+            container.appendChild(newItem);
+            bindEvents(newItem);
+        });
+
+        bindEvents(document.getElementById('itens-container').children[0]);
+
+        // Intercepta o submit do formulário para mostrar o preview primeiro
+        document.getElementById('manifestoForm').addEventListener('submit', function(e) {
+            if (this.dataset.confirmado === 'true') {
+                return true;
+            }
+            e.preventDefault();
+            mostrarPreview();
+        });
+
+        // Botão de confirmar salvar no modal
+        document.getElementById('btnConfirmarSalvar').addEventListener('click', function() {
+            const form = document.getElementById('manifestoForm');
+            form.dataset.confirmado = 'true';
+            fecharPreview();
+            form.submit();
+        });
+    });
+
+    // ============ PREVIEW ============
+    function mostrarPreview() {
+        const form = document.getElementById('manifestoForm');
+        const formData = new FormData(form);
+
+        fetch("{% url 'preview_manifesto' %}", {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-CSRFToken': formData.get('csrfmiddlewaretoken')
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (!data.sucesso) {
+                alert('Erro ao gerar pré-visualização.');
+                return;
+            }
+            renderPreview(data);
+        })
+        .catch(error => {
+            alert('Erro de comunicação com o servidor.');
+            console.error(error);
+        });
+    }
+
+    function renderPreview(data) {
+        const content = document.getElementById('previewContent');
+        const btnConfirmar = document.getElementById('btnConfirmarSalvar');
+
+        let html = '';
+
+        // ALERTAS DE ERRO
+        if (data.chassis_duplicados_form.length > 0) {
+            html += `
+                <div class="bg-red-50 border-l-4 border-red-500 p-4 rounded-lg mb-4">
+                    <h4 class="font-bold text-red-700 mb-2">⚠️ Chassis Duplicados no Formulário</h4>
+                    <ul class="text-sm text-red-600 list-disc list-inside">
+                        ${data.chassis_duplicados_form.map(c => `<li>${c}</li>`).join('')}
+                    </ul>
+                </div>
+            `;
+        }
+
+        if (data.chassis_existentes.length > 0) {
+            html += `
+                <div class="bg-red-50 border-l-4 border-red-500 p-4 rounded-lg mb-4">
+                    <h4 class="font-bold text-red-700 mb-2">⚠️ Chassis Já Cadastrados no Sistema</h4>
+                    <ul class="text-sm text-red-600 list-disc list-inside">
+                        ${data.chassis_existentes.map(c => `<li>${c}</li>`).join('')}
+                    </ul>
+                </div>
+            `;
+        }
+
+        if (!data.tem_erros) {
+            html += `
+                <div class="bg-green-50 border-l-4 border-green-500 p-4 rounded-lg mb-4">
+                    <p class="text-green-700 font-semibold">✅ Nenhum conflito detectado. Tudo pronto para salvar!</p>
+                </div>
+            `;
+        }
+
+        // TABELA DE ITENS
+        html += `
+            <table class="w-full text-sm border-collapse mb-4">
+                <thead>
+                    <tr class="bg-[#0B1A2A] text-white">
+                        <th class="text-left px-3 py-2">BL</th>
+                        <th class="text-left px-3 py-2">Modelo</th>
+                        <th class="text-center px-3 py-2">Qtd</th>
+                        <th class="text-left px-3 py-2">Chassis</th>
+                    </tr>
+                </thead>
+                <tbody>
+        `;
+
+        data.itens.forEach(item => {
+            const chassisBadges = item.chassis.map(c => {
+                const isDup = data.chassis_duplicados_form.includes(c);
+                const isExist = data.chassis_existentes.includes(c);
+                const cls = (isDup || isExist) ? 'bg-red-100 text-red-700' : 'bg-gray-100 text-gray-700';
+                return `<span class="${cls} inline-block px-2 py-1 rounded text-xs mr-1 mb-1">${c}</span>`;
+            }).join('');
+
+            html += `
+                <tr class="border-b border-gray-200">
+                    <td class="px-3 py-2 font-semibold text-[#0B1A2A]">${item.bl || '-'}</td>
+                    <td class="px-3 py-2">${item.modelo}</td>
+                    <td class="px-3 py-2 text-center">${item.quantidade}</td>
+                    <td class="px-3 py-2">${chassisBadges || '<span class="text-gray-400">Sem chassis</span>'}</td>
+                </tr>
+            `;
+        });
+
+        html += `</tbody></table>`;
+
+        // TOTAIS
+        html += `
+            <div class="grid grid-cols-2 gap-4 mt-4">
+                <div class="bg-[#0B1A2A] text-white p-4 rounded-lg text-center">
+                    <p class="text-xs uppercase tracking-wide opacity-80">Total de Veículos</p>
+                    <p class="text-3xl font-bold">${data.total_veiculos}</p>
+                </div>
+                <div class="bg-[#0B1A2A] text-white p-4 rounded-lg text-center">
+                    <p class="text-xs uppercase tracking-wide opacity-80">Metragem Total</p>
+                    <p class="text-3xl font-bold text-[#00AEEF]">${data.total_metragem} m²</p>
+                </div>
+            </div>
+        `;
+
+        content.innerHTML = html;
+
+        // Habilita/desabilita o botão de confirmar
+        btnConfirmar.disabled = data.tem_erros;
+        btnConfirmar.classList.toggle('opacity-50', data.tem_erros);
+        btnConfirmar.classList.toggle('cursor-not-allowed', data.tem_erros);
+    }
+
+    function fecharPreview() {
+        document.getElementById('previewModal').classList.add('hidden');
+        document.getElementById('previewModal').classList.remove('flex');
+    }
+
+    // Abre o modal quando o preview é renderizado
+    const originalRenderPreview = renderPreview;
+    renderPreview = function(data) {
+        originalRenderPreview(data);
+        const modal = document.getElementById('previewModal');
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+    };
+</script>
+{% endblock %}

@@ -1,0 +1,269 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<!-- Cabeçalho estilo Dashboard -->
+<div class="bg-gradient-to-r from-[#0B1A2A] to-[#1F3346] rounded-2xl p-6 sm:p-8 mb-6 sm:mb-8 shadow-lg relative overflow-hidden">
+    <div class="absolute top-0 right-0 w-64 h-64 bg-[#00AEEF] opacity-10 rounded-full blur-3xl"></div>
+    
+    <div class="relative z-10">
+        <h1 class="text-2xl sm:text-3xl font-bold text-white tracking-tight flex items-center gap-3">
+            <svg class="w-8 h-8 sm:w-9 sm:h-9 text-[#00AEEF]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+            </svg>
+            Buscar Veículo pelo Chassi
+        </h1>
+    </div>
+</div>
+
+<!-- Formulário de Busca -->
+<div class="max-w-4xl mx-auto mb-8">
+    <form method="get" action="{% url 'busca_chassi' %}" id="form-busca" class="flex flex-col sm:flex-row gap-3">
+        <div class="relative flex-grow">
+            <input type="text" name="chassi" id="input-chassi" placeholder="Digite o chassi do veículo ou escaneie o QR Code..." value="{{ chassi_busca|default:'' }}" class="w-full p-4 pl-12 bg-white border border-gray-300 rounded-xl shadow-sm focus:ring-2 focus:ring-[#00AEEF] outline-none text-base">
+            <svg class="w-5 h-5 text-gray-400 absolute left-4 top-1/2 transform -translate-y-1/2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+        </div>
+        <button type="submit" class="bg-[#00AEEF] hover:bg-[#0091cc] text-white px-8 py-4 rounded-xl font-bold shadow-md transition flex items-center justify-center gap-2">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+            Buscar
+        </button>
+        <button type="button" id="btn-escanear-qr" class="bg-[#0B1A2A] hover:bg-[#1F3346] text-white px-6 py-4 rounded-xl font-bold shadow-md transition flex items-center justify-center gap-2">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"/></svg>
+            Escanear QR
+        </button>
+    </form>
+</div>
+
+<!-- Área do Scanner -->
+<div id="scanner-container" class="hidden max-w-4xl mx-auto mb-8 bg-black rounded-2xl p-5 border-2 border-[#00AEEF] shadow-lg">
+    <div class="flex justify-between items-center mb-4">
+        <p class="text-white font-bold text-sm flex items-center gap-2">
+            <span class="w-2 h-2 bg-red-500 rounded-full animate-pulse"></span>
+            Apontando para o QR Code do veículo...
+        </p>
+        <button type="button" id="btn-fechar-scanner" class="text-white hover:text-red-400 transition">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+        </button>
+    </div>
+    <div id="reader" class="w-full rounded-lg overflow-hidden"></div>
+</div>
+
+{% if chassi_busca %}
+    {% if carga %}
+    <div class="max-w-6xl mx-auto space-y-8">
+        
+        <!-- Grid de Informações -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- Localização Atual -->
+            <div class="bg-[#0B1A2A] p-6 rounded-2xl border border-[#1F3346]">
+                <h2 class="text-xl font-bold text-white border-b border-[#1F3346] pb-3 mb-4 flex items-center gap-2">
+                    <svg class="w-6 h-6 text-[#00AEEF]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                    Localização Atual
+                </h2>
+                <div class="space-y-3 text-sm">
+                    <div class="flex justify-between">
+                        <span class="text-gray-400">Setor Atual:</span>
+                        <span class="font-semibold text-white">{{ carga.setor_atual.nome|default:"Ainda não chegou" }}</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-400">Localização Aproximada:</span>
+                        <span class="font-semibold text-white">{{ carga.localizacao_aproximada|default:"Não informada" }}</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-400">Lat / Long:</span>
+                        <span class="font-semibold text-white">{{ carga.latitude|default:"-" }} / {{ carga.longitude|default:"-" }}</span>
+                    </div>
+                </div>
+                
+                <!-- Mapa -->
+                <div id="map" class="mt-4 h-64 w-full rounded-xl border border-[#1F3346] bg-[#1F3346] flex items-center justify-center text-gray-400 text-sm"
+                     data-lat="{{ carga.latitude|default:'' }}"
+                     data-lng="{{ carga.longitude|default:'' }}"
+                     data-chassi="{{ carga.chassi|default:'' }}"
+                     data-setor="{{ carga.setor_atual.nome|default:'' }}">
+                    Carregando mapa...
+                </div>
+            </div>
+
+            <!-- Identificação -->
+            <div class="bg-white p-6 rounded-2xl shadow-md border border-gray-100">
+                <h2 class="text-xl font-bold text-[#0B1A2A] border-b border-gray-100 pb-3 mb-4 flex items-center gap-2">
+                    <svg class="w-6 h-6 text-[#00AEEF]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6M9 8h6M5 3h14a2 2 0 012 2v14a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2z"/></svg>
+                    Identificação
+                </h2>
+                <ul class="space-y-3 text-sm">
+                    <li class="flex justify-between border-b border-gray-100 pb-2"><span class="text-gray-500">Chassi:</span> <span class="font-bold text-[#0B1A2A]">{{ carga.chassi }}</span></li>
+                    
+                    <li class="flex justify-between border-b border-gray-100 pb-2">
+                        <span class="text-gray-500">Modelo / Ano:</span> 
+                        <span class="font-semibold text-[#0B1A2A]">
+                            {% if carga.modelo %}
+                                {{ carga.modelo.fabricante }} {{ carga.modelo.modelo }} ({{ carga.modelo.ano }})
+                            {% else %}
+                                <span class="text-gray-400">Não informado</span>
+                            {% endif %}
+                        </span>
+                    </li>
+                    
+                    <li class="flex justify-between border-b border-gray-100 pb-2"><span class="text-gray-500">Navio:</span> <span class="font-semibold text-[#0B1A2A]">{{ carga.manifesto.viagem.navio.nome }}</span></li>
+                    <li class="flex justify-between border-b border-gray-100 pb-2"><span class="text-gray-500">Nº Programação:</span> <span class="font-semibold text-[#0B1A2A]">{{ carga.manifesto.viagem.numero_viagem }}</span></li>
+                    <li class="flex justify-between border-b border-gray-100 pb-2"><span class="text-gray-500">BL:</span> <span class="font-semibold text-[#0B1A2A]">{{ carga.bl|default:"-" }}</span></li>
+                    <li class="flex justify-between border-b border-gray-100 pb-2"><span class="text-gray-500">Operador:</span> <span class="font-semibold text-[#0B1A2A]">{{ carga.operador.nome_empresa|default:"-" }}</span></li>
+                    <li class="flex justify-between border-b border-gray-100 pb-2"><span class="text-gray-500">Fiel Depositário:</span> <span class="font-semibold text-[#0B1A2A]">{{ carga.dono.nome_completo|default:"-" }}</span></li>
+                    <li class="flex justify-between border-b border-gray-100 pb-2"><span class="text-gray-500">Previsão de Chegada:</span> <span class="font-semibold text-[#0B1A2A]">{{ carga.manifesto.viagem.data_prevista_chegada|date:"d/m/Y" }}</span></li>
+                    <li class="flex justify-between border-b border-gray-100 pb-2"><span class="text-gray-500">Previsão de Saída:</span> <span class="font-semibold text-[#0B1A2A]">{{ carga.manifesto.data_estimada_retirada|date:"d/m/Y"|default:"A definir" }}</span></li>
+                </ul>
+            </div>
+        </div>
+        
+        <!-- Histórico de Movimentações -->
+        <div class="bg-white p-6 rounded-2xl shadow-md border border-gray-100">
+            <h2 class="text-xl font-bold text-[#0B1A2A] border-b border-gray-100 pb-3 mb-4 flex items-center gap-2">
+                <svg class="w-6 h-6 text-[#00AEEF]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                Histórico de Movimentações
+            </h2>
+            {% if historico %}
+            <div class="space-y-3">
+                {% for mov in historico %}
+                <div class="text-sm bg-gray-50 p-3 rounded-lg border border-gray-100 flex justify-between items-center">
+                    <div>
+                        <span class="font-semibold {% if mov.tipo == 'CHEGADA' %}text-green-600{% elif mov.tipo == 'SAIDA' %}text-red-600{% else %}text-blue-600{% endif %}">{{ mov.get_tipo_display }}</span>
+                        <span class="text-gray-400 mx-2">→</span>
+                        <span>{{ mov.setor_destino.nome|default:"Fora do Porto" }}</span>
+                        {% if mov.setor_origem %}
+                        <span class="text-xs text-gray-400">(Origem: {{ mov.setor_origem.nome }})</span>
+                        {% endif %}
+                    </div>
+                    <div class="text-right text-xs text-gray-400">
+                        <div>{{ mov.data_hora|date:"d/m/Y H:i" }}</div>
+                        <div class="text-gray-500">Operador: {{ mov.trabalhador.nome_completo|default:"-" }}</div>
+                        {% if mov.fotografia_chassi %}
+                        <a href="{{ mov.fotografia_chassi.url }}" target="_blank" class="text-[#00AEEF] underline">📷 Ver foto</a>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+                <p class="text-gray-500 text-sm">Este veículo ainda não possui movimentações registradas.</p>
+            {% endif %}
+        </div>
+        {% else %}
+        <div class="max-w-4xl mx-auto">
+            <div class="bg-red-50 border-l-4 border-red-500 p-4 text-red-700 text-sm rounded-lg shadow-sm">
+                Nenhum veículo encontrado com o chassi <strong>"{{ chassi_busca }}"</strong>.
+            </div>
+        </div>
+        {% endif %}
+    {% endif %}
+
+<!-- Leaflet (LOCAL) -->
+<link rel="stylesheet" href="{% static 'css/leaflet.css' %}" />
+<script src="{% static 'js/leaflet.js' %}"></script>
+
+<!-- Lib do Scanner de QR Code (LOCAL) -->
+<script src="{% static 'js/html5-qrcode.min.js' %}"></script>
+
+<script>
+    function extrairChassi(texto) {
+        if (!texto) return '';
+        texto = texto.trim();
+        if (texto.startsWith('http://') || texto.startsWith('https://')) {
+            try {
+                const url = new URL(texto);
+                const partes = url.pathname.split('/').filter(Boolean);
+                return partes.length > 0 ? partes[partes.length - 1].trim() : '';
+            } catch (e) {
+                const partes = texto.split('/').filter(Boolean);
+                return partes.length > 0 ? partes[partes.length - 1].trim() : '';
+            }
+        }
+        return texto;
+    }
+
+    document.addEventListener("DOMContentLoaded", function() {
+        // ========== MAPA ==========
+        var mapElement = document.getElementById('map');
+        if (mapElement) {
+            var lat = mapElement.getAttribute('data-lat');
+            var lng = mapElement.getAttribute('data-lng');
+            var chassi = mapElement.getAttribute('data-chassi');
+            var setor = mapElement.getAttribute('data-setor');
+
+            if (lat && lng) {
+                var map = L.map('map').setView([parseFloat(lat), parseFloat(lng)], 16);
+                
+                // ⚠️ SUBSTITUA 'YOUR_KEY' PELA SUA CHAVE REAL DO CARTO
+                L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png?key=cb1_4puy_1_b7743ab57005567c7884a5d3', {
+                    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
+                    subdomains: 'abcd',
+                    maxZoom: 20
+                }).addTo(map);
+                
+                L.marker([parseFloat(lat), parseFloat(lng)]).addTo(map)
+                    .bindPopup(chassi + " - " + setor);
+            } else {
+                mapElement.innerHTML = "Coordenadas não disponíveis para exibir o mapa.";
+            }
+        }
+
+        // ========== SCANNER DE QR CODE ==========
+        const btnEscanear = document.getElementById('btn-escanear-qr');
+        const btnFecharScanner = document.getElementById('btn-fechar-scanner');
+        const scannerContainer = document.getElementById('scanner-container');
+        const inputChassi = document.getElementById('input-chassi');
+        const formBusca = document.getElementById('form-busca');
+
+        let html5QrCode = null;
+
+        if (btnEscanear) {
+            btnEscanear.addEventListener('click', function() {
+                scannerContainer.classList.remove('hidden');
+                if (!html5QrCode) {
+                    html5QrCode = new Html5Qrcode("reader");
+                }
+                html5QrCode.start(
+                    { facingMode: "environment" },
+                    { fps: 10, qrbox: { width: 250, height: 250 } },
+                    (decodedText) => {
+                        const chassi = extrairChassi(decodedText);
+                        inputChassi.value = chassi;
+                        pararScanner();
+                        formBusca.submit();
+                    },
+                    (errorMessage) => {}
+                ).catch(err => {
+                    alert("Não foi possível acessar a câmera. Verifique as permissões do navegador.");
+                    console.error(err);
+                    scannerContainer.classList.add('hidden');
+                });
+            });
+        }
+
+        function pararScanner() {
+            if (html5QrCode && html5QrCode.isScanning) {
+                html5QrCode.stop().then(() => {
+                    scannerContainer.classList.add('hidden');
+                }).catch(err => console.error(err));
+            } else {
+                scannerContainer.classList.add('hidden');
+            }
+        }
+
+        if (btnFecharScanner) {
+            btnFecharScanner.addEventListener('click', pararScanner);
+        }
+
+        if (formBusca) {
+            formBusca.addEventListener('submit', function(e) {
+                const valor = inputChassi.value.trim();
+                if (valor.startsWith('http://') || valor.startsWith('https://')) {
+                    e.preventDefault();
+                    inputChassi.value = extrairChassi(valor);
+                    formBusca.submit();
+                }
+            });
+        }
+    });
+</script>
+{% endblock %}

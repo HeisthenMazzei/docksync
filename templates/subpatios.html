@@ -1,0 +1,319 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<!-- Cabeçalho -->
+<div class="bg-gradient-to-r from-[#0B1A2A] to-[#1F3346] rounded-2xl p-5 sm:p-8 mb-6 sm:mb-8 shadow-lg relative overflow-hidden">
+    <div class="absolute top-0 right-0 w-64 h-64 bg-[#00AEEF] opacity-10 rounded-full blur-3xl"></div>
+    
+    <div class="relative z-10 flex flex-col md:flex-row justify-between items-center gap-4">
+        <div>
+            <h1 class="text-2xl sm:text-3xl font-bold text-white tracking-tight flex items-center gap-3">
+                <svg class="w-7 h-7 sm:w-8 sm:h-8 text-[#00AEEF]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+                </svg>
+                Subpátios de Pátio Modelo
+            </h1>
+        </div>
+        
+        <div class="flex gap-2 sm:gap-3 w-full md:w-auto">
+            <a href="{% url 'mapa_patio' %}" class="flex-1 md:flex-none flex items-center justify-center gap-2 text-sm font-bold text-white bg-[#00AEEF] hover:bg-[#0091cc] px-4 py-2 rounded-lg transition shadow-md">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"/></svg>
+                Mapa Visual
+            </a>
+            <a href="{% url 'gestao_patio' %}" class="flex-1 md:flex-none flex items-center justify-center gap-2 text-sm font-medium text-white bg-white/10 hover:bg-white/20 border border-white/20 px-4 py-2 rounded-lg transition">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
+                Voltar
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- ============================================ -->
+<!-- GRID MOBILE — Ordem numérica (P1, P2, P3...)   -->
+<!-- ============================================ -->
+<div class="grid grid-cols-1 gap-4 lg:hidden">
+    {% for subpatio in subpatios_numerico %}
+    
+    {% if subpatio.percentual_ocupacao >= 95 %}
+        {% with cor_barra="bg-gradient-to-r from-red-500 to-red-700" cor_texto="text-red-400" cor_borda="border-red-500/40" cor_badge="bg-red-500" status_label="CRÍTICO" %}
+        <div class="bg-[#0B1A2A] p-5 rounded-2xl border-2 {{ cor_borda }} shadow-lg relative overflow-hidden">
+            <div class="absolute top-0 right-0 w-32 h-32 bg-red-500 opacity-10 rounded-full blur-3xl"></div>
+            <div class="relative z-10">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-2xl font-extrabold text-white">{{ subpatio.nome }}</h3>
+                    <span class="{{ cor_badge }} text-white text-[10px] font-bold px-2 py-1 rounded tracking-wider">{{ status_label }}</span>
+                </div>
+                <div class="grid grid-cols-2 gap-3 mb-4">
+                    <div>
+                        <p class="text-2xl font-bold text-white">{{ subpatio.quantidade_cargas }}</p>
+                        <p class="text-[10px] text-gray-400 uppercase tracking-wider mt-1">Carros</p>
+                    </div>
+                    <div>
+                        <p class="text-2xl font-bold text-white">{{ subpatio.metragem_ocupada|floatformat:1 }}<span class="text-sm font-medium text-gray-400"> m²</span></p>
+                        <p class="text-[10px] text-gray-400 uppercase tracking-wider mt-1">Área Ocupada</p>
+                    </div>
+                </div>
+                <div class="mb-4">
+                    <div class="flex justify-between text-xs text-gray-400 mb-2">
+                        <span>Ocupação</span>
+                        <span class="font-bold {{ cor_texto }}">{{ subpatio.percentual_ocupacao }}%</span>
+                    </div>
+                    <div class="w-full bg-[#1F3346] rounded-full h-2.5 overflow-hidden">
+                        <div class="{{ cor_barra }} h-2.5 rounded-full transition-all duration-500" style="width: {{ subpatio.percentual_ocupacao }}%;"></div>
+                    </div>
+                </div>
+                <a href="{% url 'patio_detail' subpatio.pk %}" class="btn-Docksync w-full px-4 py-2 rounded-lg text-sm font-bold text-center transition block">Ver Detalhes</a>
+            </div>
+        </div>
+        {% endwith %}
+
+    {% elif subpatio.percentual_ocupacao >= 80 %}
+        {% with cor_barra="bg-gradient-to-r from-orange-500 to-orange-700" cor_texto="text-orange-400" cor_borda="border-orange-500/40" cor_badge="bg-orange-500" status_label="ALERTA" %}
+        <div class="bg-[#0B1A2A] p-5 rounded-2xl border-2 {{ cor_borda }} shadow-lg relative overflow-hidden">
+            <div class="absolute top-0 right-0 w-32 h-32 bg-orange-500 opacity-10 rounded-full blur-3xl"></div>
+            <div class="relative z-10">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-2xl font-extrabold text-white">{{ subpatio.nome }}</h3>
+                    <span class="{{ cor_badge }} text-white text-[10px] font-bold px-2 py-1 rounded tracking-wider">{{ status_label }}</span>
+                </div>
+                <div class="grid grid-cols-2 gap-3 mb-4">
+                    <div>
+                        <p class="text-2xl font-bold text-white">{{ subpatio.quantidade_cargas }}</p>
+                        <p class="text-[10px] text-gray-400 uppercase tracking-wider mt-1">Carros</p>
+                    </div>
+                    <div>
+                        <p class="text-2xl font-bold text-white">{{ subpatio.metragem_ocupada|floatformat:1 }}<span class="text-sm font-medium text-gray-400"> m²</span></p>
+                        <p class="text-[10px] text-gray-400 uppercase tracking-wider mt-1">Área Ocupada</p>
+                    </div>
+                </div>
+                <div class="mb-4">
+                    <div class="flex justify-between text-xs text-gray-400 mb-2">
+                        <span>Ocupação</span>
+                        <span class="font-bold {{ cor_texto }}">{{ subpatio.percentual_ocupacao }}%</span>
+                    </div>
+                    <div class="w-full bg-[#1F3346] rounded-full h-2.5 overflow-hidden">
+                        <div class="{{ cor_barra }} h-2.5 rounded-full transition-all duration-500" style="width: {{ subpatio.percentual_ocupacao }}%;"></div>
+                    </div>
+                </div>
+                <a href="{% url 'patio_detail' subpatio.pk %}" class="btn-Docksync w-full px-4 py-2 rounded-lg text-sm font-bold text-center transition block">Ver Detalhes</a>
+            </div>
+        </div>
+        {% endwith %}
+
+    {% elif subpatio.percentual_ocupacao >= 50 %}
+        {% with cor_barra="bg-gradient-to-r from-yellow-400 to-yellow-600" cor_texto="text-yellow-400" cor_borda="border-yellow-500/40" cor_badge="bg-yellow-500" status_label="ATENÇÃO" %}
+        <div class="bg-[#0B1A2A] p-5 rounded-2xl border-2 {{ cor_borda }} shadow-lg relative overflow-hidden">
+            <div class="absolute top-0 right-0 w-32 h-32 bg-yellow-500 opacity-10 rounded-full blur-3xl"></div>
+            <div class="relative z-10">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-2xl font-extrabold text-white">{{ subpatio.nome }}</h3>
+                    <span class="{{ cor_badge }} text-white text-[10px] font-bold px-2 py-1 rounded tracking-wider">{{ status_label }}</span>
+                </div>
+                <div class="grid grid-cols-2 gap-3 mb-4">
+                    <div>
+                        <p class="text-2xl font-bold text-white">{{ subpatio.quantidade_cargas }}</p>
+                        <p class="text-[10px] text-gray-400 uppercase tracking-wider mt-1">Carros</p>
+                    </div>
+                    <div>
+                        <p class="text-2xl font-bold text-white">{{ subpatio.metragem_ocupada|floatformat:1 }}<span class="text-sm font-medium text-gray-400"> m²</span></p>
+                        <p class="text-[10px] text-gray-400 uppercase tracking-wider mt-1">Área Ocupada</p>
+                    </div>
+                </div>
+                <div class="mb-4">
+                    <div class="flex justify-between text-xs text-gray-400 mb-2">
+                        <span>Ocupação</span>
+                        <span class="font-bold {{ cor_texto }}">{{ subpatio.percentual_ocupacao }}%</span>
+                    </div>
+                    <div class="w-full bg-[#1F3346] rounded-full h-2.5 overflow-hidden">
+                        <div class="{{ cor_barra }} h-2.5 rounded-full transition-all duration-500" style="width: {{ subpatio.percentual_ocupacao }}%;"></div>
+                    </div>
+                </div>
+                <a href="{% url 'patio_detail' subpatio.pk %}" class="btn-Docksync w-full px-4 py-2 rounded-lg text-sm font-bold text-center transition block">Ver Detalhes</a>
+            </div>
+        </div>
+        {% endwith %}
+
+    {% else %}
+        {% with cor_barra="bg-gradient-to-r from-emerald-500 to-emerald-700" cor_texto="text-emerald-400" cor_borda="border-emerald-500/40" cor_badge="bg-emerald-500" status_label="LIVRE" %}
+        <div class="bg-[#0B1A2A] p-5 rounded-2xl border-2 {{ cor_borda }} shadow-lg relative overflow-hidden">
+            <div class="absolute top-0 right-0 w-32 h-32 bg-emerald-500 opacity-10 rounded-full blur-3xl"></div>
+            <div class="relative z-10">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-2xl font-extrabold text-white">{{ subpatio.nome }}</h3>
+                    <span class="{{ cor_badge }} text-white text-[10px] font-bold px-2 py-1 rounded tracking-wider">{{ status_label }}</span>
+                </div>
+                <div class="grid grid-cols-2 gap-3 mb-4">
+                    <div>
+                        <p class="text-2xl font-bold text-white">{{ subpatio.quantidade_cargas }}</p>
+                        <p class="text-[10px] text-gray-400 uppercase tracking-wider mt-1">Carros</p>
+                    </div>
+                    <div>
+                        <p class="text-2xl font-bold text-white">{{ subpatio.metragem_ocupada|floatformat:1 }}<span class="text-sm font-medium text-gray-400"> m²</span></p>
+                        <p class="text-[10px] text-gray-400 uppercase tracking-wider mt-1">Área Ocupada</p>
+                    </div>
+                </div>
+                <div class="mb-4">
+                    <div class="flex justify-between text-xs text-gray-400 mb-2">
+                        <span>Ocupação</span>
+                        <span class="font-bold {{ cor_texto }}">{{ subpatio.percentual_ocupacao }}%</span>
+                    </div>
+                    <div class="w-full bg-[#1F3346] rounded-full h-2.5 overflow-hidden">
+                        <div class="{{ cor_barra }} h-2.5 rounded-full transition-all duration-500" style="width: {{ subpatio.percentual_ocupacao }}%;"></div>
+                    </div>
+                </div>
+                <a href="{% url 'patio_detail' subpatio.pk %}" class="btn-Docksync w-full px-4 py-2 rounded-lg text-sm font-bold text-center transition block">Ver Detalhes</a>
+            </div>
+        </div>
+        {% endwith %}
+    {% endif %}
+
+    {% empty %}
+    <div class="text-center text-gray-500 py-12">Nenhum subpátio cadastrado.</div>
+    {% endfor %}
+</div>
+
+<!-- ============================================ -->
+<!-- GRID DESKTOP — Ordem física                    -->
+<!-- ============================================ -->
+<div class="hidden lg:grid lg:grid-cols-3 xl:grid-cols-4 gap-6">
+    {% for subpatio in subpatios %}
+    
+    {% if subpatio.percentual_ocupacao >= 95 %}
+        {% with cor_barra="bg-gradient-to-r from-red-500 to-red-700" cor_texto="text-red-400" cor_borda="border-red-500/40" cor_badge="bg-red-500" status_label="CRÍTICO" %}
+        <div class="bg-[#0B1A2A] p-6 rounded-2xl border-2 {{ cor_borda }} hover:border-red-500 transition-all duration-300 flex flex-col justify-between shadow-lg relative overflow-hidden">
+            <div class="absolute top-0 right-0 w-32 h-32 bg-red-500 opacity-10 rounded-full blur-3xl"></div>
+            <div class="relative z-10">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="text-3xl font-extrabold text-white tracking-tight">{{ subpatio.nome }}</h3>
+                    <span class="{{ cor_badge }} text-white text-[10px] font-bold px-2 py-1 rounded tracking-wider">{{ status_label }}</span>
+                </div>
+                <div class="grid grid-cols-2 gap-4 mb-6">
+                    <div>
+                        <p class="text-3xl font-bold text-white">{{ subpatio.quantidade_cargas }}</p>
+                        <p class="text-xs text-gray-400 uppercase tracking-wider mt-1">Carros</p>
+                    </div>
+                    <div>
+                        <p class="text-3xl font-bold text-white">{{ subpatio.metragem_ocupada|floatformat:1 }}<span class="text-base font-medium text-gray-400"> m²</span></p>
+                        <p class="text-xs text-gray-400 uppercase tracking-wider mt-1">Área Ocupada</p>
+                    </div>
+                </div>
+                <div class="mb-6">
+                    <div class="flex justify-between text-xs text-gray-400 mb-2">
+                        <span>Ocupação</span>
+                        <span class="font-bold {{ cor_texto }}">{{ subpatio.percentual_ocupacao }}%</span>
+                    </div>
+                    <div class="w-full bg-[#1F3346] rounded-full h-2.5 overflow-hidden">
+                        <div class="{{ cor_barra }} h-2.5 rounded-full transition-all duration-500" style="width: {{ subpatio.percentual_ocupacao }}%;"></div>
+                    </div>
+                </div>
+                <a href="{% url 'patio_detail' subpatio.pk %}" class="btn-Docksync w-full px-4 py-2 rounded-lg text-sm font-bold text-center transition block">Ver Detalhes</a>
+            </div>
+        </div>
+        {% endwith %}
+
+    {% elif subpatio.percentual_ocupacao >= 80 %}
+        {% with cor_barra="bg-gradient-to-r from-orange-500 to-orange-700" cor_texto="text-orange-400" cor_borda="border-orange-500/40" cor_badge="bg-orange-500" status_label="ALERTA" %}
+        <div class="bg-[#0B1A2A] p-6 rounded-2xl border-2 {{ cor_borda }} hover:border-orange-500 transition-all duration-300 flex flex-col justify-between shadow-lg relative overflow-hidden">
+            <div class="absolute top-0 right-0 w-32 h-32 bg-orange-500 opacity-10 rounded-full blur-3xl"></div>
+            <div class="relative z-10">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="text-3xl font-extrabold text-white tracking-tight">{{ subpatio.nome }}</h3>
+                    <span class="{{ cor_badge }} text-white text-[10px] font-bold px-2 py-1 rounded tracking-wider">{{ status_label }}</span>
+                </div>
+                <div class="grid grid-cols-2 gap-4 mb-6">
+                    <div>
+                        <p class="text-3xl font-bold text-white">{{ subpatio.quantidade_cargas }}</p>
+                        <p class="text-xs text-gray-400 uppercase tracking-wider mt-1">Carros</p>
+                    </div>
+                    <div>
+                        <p class="text-3xl font-bold text-white">{{ subpatio.metragem_ocupada|floatformat:1 }}<span class="text-base font-medium text-gray-400"> m²</span></p>
+                        <p class="text-xs text-gray-400 uppercase tracking-wider mt-1">Área Ocupada</p>
+                    </div>
+                </div>
+                <div class="mb-6">
+                    <div class="flex justify-between text-xs text-gray-400 mb-2">
+                        <span>Ocupação</span>
+                        <span class="font-bold {{ cor_texto }}">{{ subpatio.percentual_ocupacao }}%</span>
+                    </div>
+                    <div class="w-full bg-[#1F3346] rounded-full h-2.5 overflow-hidden">
+                        <div class="{{ cor_barra }} h-2.5 rounded-full transition-all duration-500" style="width: {{ subpatio.percentual_ocupacao }}%;"></div>
+                    </div>
+                </div>
+                <a href="{% url 'patio_detail' subpatio.pk %}" class="btn-Docksync w-full px-4 py-2 rounded-lg text-sm font-bold text-center transition block">Ver Detalhes</a>
+            </div>
+        </div>
+        {% endwith %}
+
+    {% elif subpatio.percentual_ocupacao >= 50 %}
+        {% with cor_barra="bg-gradient-to-r from-yellow-400 to-yellow-600" cor_texto="text-yellow-400" cor_borda="border-yellow-500/40" cor_badge="bg-yellow-500" status_label="ATENÇÃO" %}
+        <div class="bg-[#0B1A2A] p-6 rounded-2xl border-2 {{ cor_borda }} hover:border-yellow-500 transition-all duration-300 flex flex-col justify-between shadow-lg relative overflow-hidden">
+            <div class="absolute top-0 right-0 w-32 h-32 bg-yellow-500 opacity-10 rounded-full blur-3xl"></div>
+            <div class="relative z-10">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="text-3xl font-extrabold text-white tracking-tight">{{ subpatio.nome }}</h3>
+                    <span class="{{ cor_badge }} text-white text-[10px] font-bold px-2 py-1 rounded tracking-wider">{{ status_label }}</span>
+                </div>
+                <div class="grid grid-cols-2 gap-4 mb-6">
+                    <div>
+                        <p class="text-3xl font-bold text-white">{{ subpatio.quantidade_cargas }}</p>
+                        <p class="text-xs text-gray-400 uppercase tracking-wider mt-1">Carros</p>
+                    </div>
+                    <div>
+                        <p class="text-3xl font-bold text-white">{{ subpatio.metragem_ocupada|floatformat:1 }}<span class="text-base font-medium text-gray-400"> m²</span></p>
+                        <p class="text-xs text-gray-400 uppercase tracking-wider mt-1">Área Ocupada</p>
+                    </div>
+                </div>
+                <div class="mb-6">
+                    <div class="flex justify-between text-xs text-gray-400 mb-2">
+                        <span>Ocupação</span>
+                        <span class="font-bold {{ cor_texto }}">{{ subpatio.percentual_ocupacao }}%</span>
+                    </div>
+                    <div class="w-full bg-[#1F3346] rounded-full h-2.5 overflow-hidden">
+                        <div class="{{ cor_barra }} h-2.5 rounded-full transition-all duration-500" style="width: {{ subpatio.percentual_ocupacao }}%;"></div>
+                    </div>
+                </div>
+                <a href="{% url 'patio_detail' subpatio.pk %}" class="btn-Docksync w-full px-4 py-2 rounded-lg text-sm font-bold text-center transition block">Ver Detalhes</a>
+            </div>
+        </div>
+        {% endwith %}
+
+    {% else %}
+        {% with cor_barra="bg-gradient-to-r from-emerald-500 to-emerald-700" cor_texto="text-emerald-400" cor_borda="border-emerald-500/40" cor_badge="bg-emerald-500" status_label="LIVRE" %}
+        <div class="bg-[#0B1A2A] p-6 rounded-2xl border-2 {{ cor_borda }} hover:border-emerald-500 transition-all duration-300 flex flex-col justify-between shadow-lg relative overflow-hidden">
+            <div class="absolute top-0 right-0 w-32 h-32 bg-emerald-500 opacity-10 rounded-full blur-3xl"></div>
+            <div class="relative z-10">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="text-3xl font-extrabold text-white tracking-tight">{{ subpatio.nome }}</h3>
+                    <span class="{{ cor_badge }} text-white text-[10px] font-bold px-2 py-1 rounded tracking-wider">{{ status_label }}</span>
+                </div>
+                <div class="grid grid-cols-2 gap-4 mb-6">
+                    <div>
+                        <p class="text-3xl font-bold text-white">{{ subpatio.quantidade_cargas }}</p>
+                        <p class="text-xs text-gray-400 uppercase tracking-wider mt-1">Carros</p>
+                    </div>
+                    <div>
+                        <p class="text-3xl font-bold text-white">{{ subpatio.metragem_ocupada|floatformat:1 }}<span class="text-base font-medium text-gray-400"> m²</span></p>
+                        <p class="text-xs text-gray-400 uppercase tracking-wider mt-1">Área Ocupada</p>
+                    </div>
+                </div>
+                <div class="mb-6">
+                    <div class="flex justify-between text-xs text-gray-400 mb-2">
+                        <span>Ocupação</span>
+                        <span class="font-bold {{ cor_texto }}">{{ subpatio.percentual_ocupacao }}%</span>
+                    </div>
+                    <div class="w-full bg-[#1F3346] rounded-full h-2.5 overflow-hidden">
+                        <div class="{{ cor_barra }} h-2.5 rounded-full transition-all duration-500" style="width: {{ subpatio.percentual_ocupacao }}%;"></div>
+                    </div>
+                </div>
+                <a href="{% url 'patio_detail' subpatio.pk %}" class="btn-Docksync w-full px-4 py-2 rounded-lg text-sm font-bold text-center transition block">Ver Detalhes</a>
+            </div>
+        </div>
+        {% endwith %}
+    {% endif %}
+
+    {% empty %}
+    <div class="col-span-full text-center text-gray-500 py-12">Nenhum subpátio cadastrado.</div>
+    {% endfor %}
+</div>
+{% endblock %}

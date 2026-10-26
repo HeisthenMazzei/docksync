@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto bg-white p-8 rounded-xl shadow-md border border-gray-100">
+    <h2 class="text-2xl font-bold text-[#0B1A2A] mb-6">➕ Cadastrar Novo Operador Portuário</h2>
+    
+    <form method="post" class="space-y-4">
+        {% csrf_token %}
+        <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Nome da Empresa</label>
+            <input type="text" name="nome_empresa" value="{{ object.nome_empresa|default:'' }}" required class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-[#00AEEF] outline-none">
+        </div>
+        <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">CNPJ</label>
+            <input type="text" name="cnpj" value="{{ object.cnpj|default:'' }}" required placeholder="00.000.000/0000-00" class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-[#00AEEF] outline-none">
+        </div>
+        <div class="flex gap-4 pt-4">
+            <button type="submit" class="btn-Docksync px-6 py-3 rounded-lg font-bold shadow-md transition">Salvar Operador</button>
+            <a href="{% url 'operador_portuario_list' %}" class="px-6 py-3 rounded-lg font-bold text-gray-500 hover:bg-gray-100 transition">Cancelar</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

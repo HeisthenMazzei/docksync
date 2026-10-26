@@ -1,0 +1,147 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<!-- Cabeçalho -->
+<div class="bg-gradient-to-r from-[#0B1A2A] to-[#1F3346] rounded-2xl p-6 sm:p-8 mb-6 sm:mb-8 shadow-lg relative overflow-hidden">
+    <div class="absolute top-0 right-0 w-64 h-64 bg-[#00AEEF] opacity-10 rounded-full blur-3xl"></div>
+    
+    <div class="relative z-10 flex flex-col md:flex-row justify-between items-center gap-4">
+        <h1 class="text-2xl sm:text-3xl font-bold text-white tracking-tight flex items-center gap-3">
+            <svg class="w-8 h-8 sm:w-9 sm:h-9 text-[#00AEEF]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h8m-8 4h8m-8 4h4M4 3h16a2 2 0 012 2v14a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2z"/>
+            </svg>
+            Programação de Navios
+        </h1>
+        
+        <a href="{% url 'viagem_create' %}" class="flex items-center gap-2 bg-[#00AEEF] hover:bg-[#0091cc] text-white px-6 py-3 rounded-xl font-bold shadow-md transition w-full md:w-auto justify-center">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+            Adicionar Programação
+        </a>
+    </div>
+</div>
+
+<!-- Filtros -->
+<div class="flex flex-wrap gap-2 mb-6">
+    <a href="?status=todos" class="px-4 py-2 rounded-lg text-sm font-bold transition
+        {% if filtro_status == 'todos' or not filtro_status %}bg-[#0B1A2A] text-white shadow-md{% else %}bg-white text-gray-600 hover:bg-gray-100 border border-gray-200{% endif %}">
+        Todos
+    </a>
+    <a href="?status=atracados" class="px-4 py-2 rounded-lg text-sm font-bold transition
+        {% if filtro_status == 'atracados' %}bg-[#00AEEF] text-white shadow-md{% else %}bg-white text-gray-600 hover:bg-gray-100 border border-gray-200{% endif %}">
+        Atracados / Operando
+    </a>
+    <a href="?status=fundeados" class="px-4 py-2 rounded-lg text-sm font-bold transition
+        {% if filtro_status == 'fundeados' %}bg-yellow-500 text-white shadow-md{% else %}bg-white text-gray-600 hover:bg-gray-100 border border-gray-200{% endif %}">
+        Fundeados
+    </a>
+    <a href="?status=esperados" class="px-4 py-2 rounded-lg text-sm font-bold transition
+        {% if filtro_status == 'esperados' %}bg-gray-500 text-white shadow-md{% else %}bg-white text-gray-600 hover:bg-gray-100 border border-gray-200{% endif %}">
+        Esperados
+    </a>
+    <a href="?status=finalizados" class="px-4 py-2 rounded-lg text-sm font-bold transition
+        {% if filtro_status == 'finalizados' %}bg-emerald-500 text-white shadow-md{% else %}bg-white text-gray-600 hover:bg-gray-100 border border-gray-200{% endif %}">
+        Finalizados
+    </a>
+</div>
+
+<!-- Card de Importação -->
+<div class="bg-white rounded-2xl shadow-md border border-gray-100 p-6 mb-8">
+    <h2 class="text-lg font-bold text-[#0B1A2A] mb-4 flex items-center gap-2">
+        <svg class="w-6 h-6 text-[#00AEEF]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+        Importar Lineup (Arquivo Excel)
+    </h2>
+    <p class="text-sm text-gray-500 mb-4">Envie o arquivo .xls ou .xlsx com as colunas: <strong>Programação, Berço, Navio, PSP, Fundeio / ETA, Atracação / ETB, Desatracação / ETS, Operador</strong>.</p>
+    
+    <form method="post" action="{% url 'importar_lineup_arquivo' %}" enctype="multipart/form-data" class="flex flex-col sm:flex-row gap-4">
+        {% csrf_token %}
+        <div class="flex-grow">
+            <input type="file" name="arquivo_lineup" accept=".xls,.xlsx" required class="w-full text-sm text-gray-500 file:mr-4 file:py-3 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-[#00AEEF] hover:file:bg-blue-100">
+        </div>
+        <button type="submit" class="bg-[#00AEEF] hover:bg-[#0091cc] text-white px-8 py-3 rounded-xl font-bold shadow-md transition flex items-center justify-center gap-2">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+            Importar Arquivo
+        </button>
+    </form>
+</div>
+
+<!-- Tabela -->
+<div class="bg-white rounded-2xl shadow-md border border-gray-100 overflow-hidden">
+    <div class="overflow-x-auto">
+        <table class="w-full text-left text-sm text-gray-600">
+            <thead class="bg-[#0B1A2A] text-white">
+                <tr>
+                    <th class="px-4 py-4 font-semibold">Navio</th>
+                    <th class="px-4 py-4 font-semibold">Nº Prog.</th>
+                    <th class="px-4 py-4 font-semibold">Berço</th>
+                    <th class="px-4 py-4 font-semibold">ETA</th>
+                    <th class="px-4 py-4 font-semibold">ETB</th>
+                    <th class="px-4 py-4 font-semibold">Operador</th>
+                    <th class="px-4 py-4 font-semibold text-center">Previsto</th>
+                    <th class="px-4 py-4 font-semibold text-center">Cadastrado</th>
+                    <th class="px-4 py-4 font-semibold text-center">Diferença</th>
+                    <th class="px-4 py-4 font-semibold">Status</th>
+                    <th class="px-4 py-4 font-semibold text-center">Ações</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-100">
+                {% for viagem in viagens %}
+                <tr class="hover:bg-gray-50 transition">
+                    <td class="px-4 py-4 font-semibold text-[#0B1A2A]">{{ viagem.navio.nome }}</td>
+                    <td class="px-4 py-4">{{ viagem.numero_viagem }}</td>
+                    <td class="px-4 py-4">{{ viagem.bercario_atracacao|default:"-" }}</td>
+                    <td class="px-4 py-4">{{ viagem.data_prevista_chegada|date:"d/m/Y"|default:"-" }}</td>
+                    <td class="px-4 py-4">{{ viagem.data_chegada_real|date:"d/m/Y"|default:"-" }}</td>
+                    <td class="px-4 py-4 text-xs">
+                        {% if viagem.operador_portuario %}
+                            {{ viagem.operador_portuario.nome_empresa|truncatechars:30 }}
+                        {% else %}
+                            {{ viagem.agencia|default:"-"|truncatechars:30 }}
+                        {% endif %}
+                    </td>
+                    <td class="px-4 py-4 text-center">
+                        <span class="bg-yellow-100 text-yellow-800 px-2 py-1 rounded text-xs font-bold">{{ viagem.quantidade_prevista }}</span>
+                    </td>
+                    <td class="px-4 py-4 text-center">
+                        <span class="bg-[#00AEEF]/20 text-[#0091cc] px-2 py-1 rounded text-xs font-bold">{{ viagem.qtd_cadastrada }}</span>
+                    </td>
+                    <td class="px-4 py-4 text-center">
+                        {% if viagem.diferenca == 0 %}
+                            <span class="text-emerald-600 font-bold text-xs">✓ OK</span>
+                        {% elif viagem.diferenca > 0 %}
+                            <span class="text-orange-600 font-bold text-xs">- {{ viagem.diferenca }}</span>
+                        {% else %}
+                            <span class="text-red-600 font-bold text-xs">+ {{ viagem.diferenca|cut:"-" }}</span>
+                        {% endif %}
+                    </td>
+                    <td class="px-4 py-4">
+                        {% if viagem.status == 'AGUARDANDO_CHEGADA' %}
+                            <span class="bg-gray-100 text-gray-700 px-3 py-1 rounded-lg text-xs font-semibold whitespace-nowrap">Esperado</span>
+                        {% elif viagem.status == 'FUNDEADO' %}
+                            <span class="bg-yellow-100 text-yellow-700 px-3 py-1 rounded-lg text-xs font-semibold whitespace-nowrap">Fundeado</span>
+                        {% elif viagem.status == 'ATRACADO' %}
+                            <span class="bg-[#00AEEF]/20 text-[#0091cc] px-3 py-1 rounded-lg text-xs font-semibold whitespace-nowrap">Atracado</span>
+                        {% elif viagem.status == 'DESCARREGANDO' %}
+                            <span class="bg-purple-100 text-purple-700 px-3 py-1 rounded-lg text-xs font-semibold whitespace-nowrap">Descarregando</span>
+                        {% elif viagem.status == 'CARREGANDO' %}
+                            <span class="bg-orange-100 text-orange-600 px-3 py-1 rounded-lg text-xs font-semibold whitespace-nowrap">Carregando</span>
+                        {% else %}
+                            <span class="bg-emerald-100 text-emerald-700 px-3 py-1 rounded-lg text-xs font-semibold whitespace-nowrap">Finalizado</span>
+                        {% endif %}
+                    </td>
+                    <td class="px-4 py-4 text-center whitespace-nowrap">
+                        <a href="{% url 'viagem_update' viagem.id %}" class="inline-block bg-blue-50 text-blue-600 px-3 py-2 rounded-lg hover:bg-blue-100 transition font-semibold text-xs">Editar</a>
+                        <a href="{% url 'viagem_delete' viagem.id %}" class="inline-block bg-red-50 text-red-600 px-3 py-2 rounded-lg hover:bg-red-100 transition font-semibold text-xs">Excluir</a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="11" class="px-6 py-8 text-center text-gray-400">
+                        Nenhuma programação encontrada.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

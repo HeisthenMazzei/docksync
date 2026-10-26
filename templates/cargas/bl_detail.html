@@ -1,0 +1,85 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto">
+    <div class="flex justify-between items-center mb-6">
+        <h1 class="text-3xl font-bold text-[#0B1A2A]">📄 Detalhes do BL: {{ bl }}</h1>
+        <div class="flex gap-3">
+            <a href="{% url 'imprimir_lote_etiquetas' %}?bl={{ bl }}" target="_blank" class="bg-[#00AEEF] hover:bg-[#0091cc] text-white px-4 py-2 rounded-lg font-semibold shadow-md transition flex items-center gap-2">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
+                Imprimir {{ total_cargas }} Etiqueta{{ total_cargas|pluralize }}
+            </a>
+            <a href="javascript:history.back()" class="bg-gray-200 text-gray-700 px-4 py-2 rounded-lg font-semibold hover:bg-gray-300 transition flex items-center gap-2">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
+                Voltar
+            </a>
+        </div>
+    </div>
+
+    <!-- Header do BL com informações do lote -->
+    <div class="bg-gradient-to-r from-[#0B1A2A] to-[#1F3346] text-white p-6 rounded-xl shadow-lg mb-6">
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div>
+                <p class="text-xs opacity-80 uppercase">Operador Portuário</p>
+                <p class="text-lg font-bold">{{ operador.nome_empresa|default:"-" }}</p>
+            </div>
+            <div>
+                <p class="text-xs opacity-80 uppercase">Fiel Depositário</p>
+                <p class="text-lg font-bold">{{ dono.nome_completo|default:"-" }}</p>
+            </div>
+            <div>
+                <p class="text-xs opacity-80 uppercase">Metragem Total</p>
+                <p class="text-lg font-bold text-[#00AEEF]">{{ total_metragem|floatformat:2 }} m²</p>
+            </div>
+            <div>
+                <p class="text-xs opacity-80 uppercase">Previsão de Saída</p>
+                <p class="text-lg font-bold">{{ previsao_saida|date:"d/m/Y"|default:"A definir" }}</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tabela dos Chassis -->
+    <div class="bg-white rounded-xl shadow-md border border-gray-100 overflow-hidden">
+        <table class="w-full text-left text-sm text-gray-600">
+            <thead class="bg-[#0B1A2A] text-white">
+                <tr>
+                    <th class="px-6 py-3 font-semibold">Chassi</th>
+                    <th class="px-6 py-3 font-semibold">Modelo / Ano</th>
+                    <th class="px-6 py-3 font-semibold">Metragem (m²)</th>
+                    <th class="px-6 py-3 font-semibold">Localização</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-100">
+                {% for carga in cargas %}
+                <tr class="hover:bg-gray-50 transition">
+                    <td class="px-6 py-4">
+                        <a href="{% url 'carga_detail' carga.id %}" class="font-semibold text-[#00AEEF] hover:text-[#0091cc] hover:underline transition">
+                            {{ carga.chassi }}
+                        </a>
+                    </td>
+                    <td class="px-6 py-4">
+                        {% if carga.modelo %}
+                            {{ carga.modelo.fabricante }} {{ carga.modelo.modelo }} ({{ carga.modelo.ano }})
+                        {% else %}
+                            <span class="text-gray-400">Sem modelo</span>
+                        {% endif %}
+                    </td>
+                    <td class="px-6 py-4 bg-gray-50 font-bold text-[#00AEEF]">{{ carga.metragem_unitaria|floatformat:2 }}</td>
+                    <td class="px-6 py-4">
+                        {% if carga.setor_atual %}
+                            <span class="bg-green-100 text-green-700 px-2 py-1 rounded">{{ carga.setor_atual.nome }}</span>
+                        {% else %}
+                            <span class="bg-gray-100 text-gray-500 px-2 py-1 rounded">Sem setor</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="4" class="px-6 py-8 text-center text-gray-400">Nenhum veículo encontrado neste BL.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

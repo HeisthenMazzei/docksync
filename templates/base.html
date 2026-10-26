@@ -1,0 +1,305 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Docksync | Rastreamento RoRo</title>
+    
+    <script src="{% static 'js/tailwind.js' %}"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <style>
+        body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background-color: #F5F7FA; color: #1A202C; }
+        .bg-Docksync { background-color: #0B1A2A; }
+        .text-Docksync-accent { color: #00AEEF; }
+        .btn-Docksync { background-color: #00AEEF; color: #FFFFFF; font-weight: 600; transition: 0.2s; }
+        .btn-Docksync:hover { background-color: #0091cc; }
+        
+        .bg-Docksync-nav { background-color: rgba(11, 26, 42, 0.98); backdrop-filter: blur(8px); }
+        .card-Docksync { background-color: #FFFFFF; border-radius: 16px; border: 1px solid #E2E8F0; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04); }
+        .input-Docksync { border: 1px solid #CBD5E1; transition: 0.2s; }
+        .input-Docksync:focus { border-color: #00AEEF; box-shadow: 0 0 0 3px rgba(0, 174, 239, 0.1); }
+        
+        .nav-link { position: relative; transition: color 0.2s; font-weight: 500; }
+        .nav-link:hover { color: #00AEEF; }
+        .nav-link:hover::after { content: ''; position: absolute; left: 0; bottom: -4px; width: 100%; height: 2px; background-color: #00AEEF; }
+
+        progress::-webkit-progress-bar { background-color: #1F3346; border-radius: 9999px; }
+        progress::-webkit-progress-value { background-color: #00AEEF; border-radius: 9999px; }
+        progress::-moz-progress-bar { background-color: #00AEEF; border-radius: 9999px; }
+        progress { appearance: none; -webkit-appearance: none; border: none; border-radius: 9999px; height: 10px; width: 100%; display: block; }
+
+        /* ============================================ */
+        /* MENU MOBILE - Drawer lateral                  */
+        /* ============================================ */
+        #mobile-menu {
+            transition: transform 0.3s ease-in-out, opacity 0.3s;
+            transform: translateX(100%);
+            opacity: 0;
+        }
+        #mobile-menu.open {
+            transform: translateX(0);
+            opacity: 1;
+        }
+        #mobile-menu-overlay {
+            transition: opacity 0.3s;
+        }
+    </style>
+</head>
+<body class="flex flex-col min-h-screen">
+    
+    <header class="bg-Docksync-nav text-white border-b border-[#1F3346] sticky top-0 z-50">
+        <div class="container mx-auto px-4 sm:px-6 py-4 flex justify-between items-center">
+            
+            <!-- Logotipo -->
+            <a href="/" class="flex items-center">
+                <img src="{% static 'images/Docksync-logo.png' %}" alt="Docksync" class="h-8 sm:h-9 w-auto object-contain">
+                <span class="ml-3 hidden lg:inline text-white text-base font-bold tracking-tight border-l border-gray-600 pl-4">Sistema de Gestão de Cargas</span>
+            </a>
+            
+            <!-- MENU DESKTOP (lg+) -->
+            <nav class="hidden lg:flex items-center gap-1">
+                {% if user.is_authenticated %}
+                    
+                    {% if user.is_superuser or 'Administrador' in user.groups.all|stringformat:"s" or 'Gestor' in user.groups.all|stringformat:"s" %}
+                        <a href="{% url 'dashboard' %}" class="nav-link px-4 py-2 text-sm opacity-90 hover:opacity-100">Dashboard</a>
+                        <a href="{% url 'gestao_patio' %}" class="nav-link px-4 py-2 text-sm opacity-90 hover:opacity-100">Gestão de Pátio</a>
+                        <a href="{% url 'relatorios' %}" class="nav-link px-4 py-2 text-sm opacity-90 hover:opacity-100">Relatórios</a>
+                    {% endif %}
+
+                    {% if user.is_superuser or 'Administrador' in user.groups.all|stringformat:"s" or 'Gestor' in user.groups.all|stringformat:"s" or 'Operador' in user.groups.all|stringformat:"s" %}
+                        <a href="{% url 'busca_chassi' %}" class="nav-link px-4 py-2 text-sm opacity-90 hover:opacity-100">Buscar Veículo</a>
+                        <a href="{% url 'registrar_movimentacao' %}" class="nav-link px-4 py-2 text-sm opacity-90 hover:opacity-100">Movimentação</a>
+                    {% endif %}
+
+                    {% if user.is_superuser or 'Administrador' in user.groups.all|stringformat:"s" or 'Gestor' in user.groups.all|stringformat:"s" %}
+                        <div class="relative group">
+                            <button class="nav-link px-4 py-2 text-sm opacity-90 hover:opacity-100 flex items-center gap-1">Gestão
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                            </button>
+                            <div class="absolute left-0 top-full mt-2 w-64 bg-[#0B1A2A] rounded-xl shadow-2xl py-2 border border-[#1F3346] opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
+                                <a href="{% url 'navio_list' %}" class="block px-4 py-2 text-sm text-white hover:bg-[#1F3346] transition">Navios</a>
+                                <a href="{% url 'viagem_list' %}" class="block px-4 py-2 text-sm text-white hover:bg-[#1F3346] transition">Trânsito de Carga</a>
+                                <a href="{% url 'manifesto_list' %}" class="block px-4 py-2 text-sm text-white hover:bg-[#1F3346] transition">Manifestos</a>
+                                <a href="{% url 'carga_list' %}" class="block px-4 py-2 text-sm text-white hover:bg-[#1F3346] transition">Cargas</a>
+                            </div>
+                        </div>
+                    {% endif %}
+
+                    {% if user.is_superuser or 'Administrador' in user.groups.all|stringformat:"s" %}
+                        <div class="relative group">
+                            <button class="nav-link px-4 py-2 text-sm opacity-90 hover:opacity-100 flex items-center gap-1">Cadastro
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                            </button>
+                            <div class="absolute left-0 top-full mt-2 w-64 bg-[#0B1A2A] rounded-xl shadow-2xl py-2 border border-[#1F3346] opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
+                                <a href="{% url 'usuario_list' %}" class="block px-4 py-2 text-sm text-white hover:bg-[#1F3346] transition">Usuários</a>
+                                <a href="{% url 'operador_portuario_list' %}" class="block px-4 py-2 text-sm text-white hover:bg-[#1F3346] transition">Operadores Portuários</a>
+                                <a href="{% url 'fiel_list' %}" class="block px-4 py-2 text-sm text-white hover:bg-[#1F3346] transition">Fiel Depositário</a>
+                                <a href="{% url 'setor_list' %}" class="block px-4 py-2 text-sm text-white hover:bg-[#1F3346] transition">Pátios</a>
+                                <a href="{% url 'modelo_list' %}" class="block px-4 py-2 text-sm text-white hover:bg-[#1F3346] transition">Modelos de Veículos</a>
+                                <a href="{% url 'trabalhador_list' %}" class="block px-4 py-2 text-sm text-white hover:bg-[#1F3346] transition">Trabalhadores Portuários</a>
+                            </div>
+                        </div>
+                    {% endif %}
+
+                    <div class="flex items-center gap-4 ml-4 pl-4 border-l border-[#1F3346]">
+                        <span class="text-xs text-gray-300">{{ user.username }}</span>
+                        <form method="post" action="{% url 'logout' %}">
+                            {% csrf_token %}
+                            <button type="submit" class="text-xs text-red-300 hover:text-red-400 transition">Sair</button>
+                        </form>
+                    </div>
+
+                {% else %}
+                    <a href="{% url 'login' %}" class="btn-Docksync px-5 py-2 rounded-lg text-sm">Entrar</a>
+                {% endif %}
+            </nav>
+
+            <!-- BOTÃO HAMBURGER (MOBILE) -->
+            {% if user.is_authenticated %}
+            <button id="btn-mobile-menu" class="lg:hidden text-white p-2 rounded-lg hover:bg-[#1F3346] transition" aria-label="Abrir menu">
+                <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+                </svg>
+            </button>
+            {% endif %}
+        </div>
+    </header>
+
+    <!-- ============================================ -->
+    <!-- MENU MOBILE (Drawer lateral)                  -->
+    <!-- ============================================ -->
+    {% if user.is_authenticated %}
+    
+    <!-- Overlay escuro -->
+    <div id="mobile-menu-overlay" class="fixed inset-0 bg-black/60 z-[60] hidden lg:hidden"></div>
+    
+    <!-- Drawer -->
+    <div id="mobile-menu" class="fixed top-0 right-0 h-full w-80 max-w-[85%] bg-[#0B1A2A] z-[70] overflow-y-auto lg:hidden">
+        <!-- Cabeçalho do menu -->
+        <div class="flex items-center justify-between p-4 border-b border-[#1F3346]">
+            <div class="flex items-center gap-2">
+                <span class="text-white font-bold text-lg">Menu</span>
+            </div>
+            <button id="btn-close-mobile-menu" class="text-white hover:text-red-400 p-2" aria-label="Fechar menu">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+            </button>
+        </div>
+
+        <!-- Usuário logado -->
+        <div class="p-4 border-b border-[#1F3346] bg-[#0F2338]">
+            <p class="text-xs text-gray-400">Logado como</p>
+            <p class="text-white font-bold">{{ user.username }}</p>
+        </div>
+
+        <!-- Links do menu mobile -->
+        <nav class="p-2">
+            
+            {% if user.is_superuser or 'Administrador' in user.groups.all|stringformat:"s" or 'Gestor' in user.groups.all|stringformat:"s" %}
+                <p class="text-[10px] uppercase tracking-wider text-gray-500 font-bold px-3 py-2 mt-2">Principal</p>
+                
+                <a href="{% url 'dashboard' %}" class="flex items-center gap-3 px-3 py-3 text-sm text-white hover:bg-[#1F3346] rounded-lg transition">
+                    <svg class="w-5 h-5 text-[#00AEEF]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
+                    Dashboard
+                </a>
+                
+                <a href="{% url 'gestao_patio' %}" class="flex items-center gap-3 px-3 py-3 text-sm text-white hover:bg-[#1F3346] rounded-lg transition">
+                    <svg class="w-5 h-5 text-[#00AEEF]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/></svg>
+                    Gestão de Pátio
+                </a>
+                
+                <a href="{% url 'relatorios' %}" class="flex items-center gap-3 px-3 py-3 text-sm text-white hover:bg-[#1F3346] rounded-lg transition">
+                    <svg class="w-5 h-5 text-[#00AEEF]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                    Relatórios
+                </a>
+            {% endif %}
+
+            {% if user.is_superuser or 'Administrador' in user.groups.all|stringformat:"s" or 'Gestor' in user.groups.all|stringformat:"s" or 'Operador' in user.groups.all|stringformat:"s" %}
+                <p class="text-[10px] uppercase tracking-wider text-gray-500 font-bold px-3 py-2 mt-4">Operacional</p>
+                
+                <a href="{% url 'busca_chassi' %}" class="flex items-center gap-3 px-3 py-3 text-sm text-white hover:bg-[#1F3346] rounded-lg transition">
+                    <svg class="w-5 h-5 text-[#00AEEF]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                    Buscar Veículo
+                </a>
+                
+                <a href="{% url 'registrar_movimentacao' %}" class="flex items-center gap-3 px-3 py-3 text-sm text-white hover:bg-[#1F3346] rounded-lg transition">
+                    <svg class="w-5 h-5 text-[#00AEEF]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h8m-8 4h8m-8 4h4M4 3h16a2 2 0 012 2v14a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2z"/></svg>
+                    Movimentação
+                </a>
+            {% endif %}
+
+            {% if user.is_superuser or 'Administrador' in user.groups.all|stringformat:"s" or 'Gestor' in user.groups.all|stringformat:"s" %}
+                <p class="text-[10px] uppercase tracking-wider text-gray-500 font-bold px-3 py-2 mt-4">Gestão</p>
+                
+                <a href="{% url 'navio_list' %}" class="flex items-center gap-3 px-3 py-3 text-sm text-white hover:bg-[#1F3346] rounded-lg transition">
+                    <svg class="w-5 h-5 text-[#00AEEF]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 17l6-6 4 4 6-6 2 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6zM9 7a2 2 0 110-4 2 2 0 010 4z"/></svg>
+                    Navios
+                </a>
+                
+                <a href="{% url 'viagem_list' %}" class="flex items-center gap-3 px-3 py-3 text-sm text-white hover:bg-[#1F3346] rounded-lg transition">
+                    <svg class="w-5 h-5 text-[#00AEEF]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 17l6-6 4 4 6-6 2 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6z"/></svg>
+                    Trânsito de Carga
+                </a>
+                
+                <a href="{% url 'manifesto_list' %}" class="flex items-center gap-3 px-3 py-3 text-sm text-white hover:bg-[#1F3346] rounded-lg transition">
+                    <svg class="w-5 h-5 text-[#00AEEF]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6M9 8h6M5 3h14a2 2 0 012 2v14a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2z"/></svg>
+                    Manifestos
+                </a>
+                
+                <a href="{% url 'carga_list' %}" class="flex items-center gap-3 px-3 py-3 text-sm text-white hover:bg-[#1F3346] rounded-lg transition">
+                    <svg class="w-5 h-5 text-[#00AEEF]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17a2 2 0 11-4 0 2 2 0 014 0zM19 17a2 2 0 11-4 0 2 2 0 014 0zM3 9a2 2 0 012-2h.5M12 19h5m-9 0H5m12-4H7a2 2 0 01-2-2V7a2 2 0 012-2h3l2 3h5a2 2 0 012 2v6a2 2 0 01-2 2z"/></svg>
+                    Cargas
+                </a>
+            {% endif %}
+
+            {% if user.is_superuser or 'Administrador' in user.groups.all|stringformat:"s" %}
+                <p class="text-[10px] uppercase tracking-wider text-gray-500 font-bold px-3 py-2 mt-4">Cadastro</p>
+                
+                <a href="{% url 'usuario_list' %}" class="flex items-center gap-3 px-3 py-3 text-sm text-white hover:bg-[#1F3346] rounded-lg transition">
+                    <svg class="w-5 h-5 text-[#00AEEF]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+                    Usuários
+                </a>
+                
+                <a href="{% url 'operador_portuario_list' %}" class="flex items-center gap-3 px-3 py-3 text-sm text-white hover:bg-[#1F3346] rounded-lg transition">
+                    <svg class="w-5 h-5 text-[#00AEEF]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
+                    Operadores Portuários
+                </a>
+                
+                <a href="{% url 'fiel_list' %}" class="flex items-center gap-3 px-3 py-3 text-sm text-white hover:bg-[#1F3346] rounded-lg transition">
+                    <svg class="w-5 h-5 text-[#00AEEF]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 21h18M3 10h18M5 6l7-3 7 3M5 10v11m7-11v11m7-11v11M4 10h16"/></svg>
+                    Fiel Depositário
+                </a>
+                
+                <a href="{% url 'setor_list' %}" class="flex items-center gap-3 px-3 py-3 text-sm text-white hover:bg-[#1F3346] rounded-lg transition">
+                    <svg class="w-5 h-5 text-[#00AEEF]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
+                    Pátios
+                </a>
+                
+                <a href="{% url 'modelo_list' %}" class="flex items-center gap-3 px-3 py-3 text-sm text-white hover:bg-[#1F3346] rounded-lg transition">
+                    <svg class="w-5 h-5 text-[#00AEEF]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h8m-8 4h8m-8 4h4M4 3h16a2 2 0 012 2v14a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2z"/></svg>
+                    Modelos de Veículos
+                </a>
+                
+                <a href="{% url 'trabalhador_list' %}" class="flex items-center gap-3 px-3 py-3 text-sm text-white hover:bg-[#1F3346] rounded-lg transition">
+                    <svg class="w-5 h-5 text-[#00AEEF]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h8m-8 4h8M4 3h16a2 2 0 012 2v14a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2z"/></svg>
+                    Trabalhadores Portuários
+                </a>
+            {% endif %}
+
+            <!-- Sair (mobile) -->
+            <div class="mt-4 pt-4 border-t border-[#1F3346] px-3 pb-4">
+                <form method="post" action="{% url 'logout' %}">
+                    {% csrf_token %}
+                    <button type="submit" class="flex items-center gap-3 px-3 py-3 text-sm text-red-400 hover:bg-red-500/10 rounded-lg transition w-full">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
+                        Sair
+                    </button>
+                </form>
+            </div>
+        </nav>
+    </div>
+    {% endif %}
+
+    <main class="flex-grow container mx-auto px-4 sm:px-6 py-6 sm:py-8">
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer class="border-t border-gray-200 bg-white py-4 text-center">
+        <p class="text-xs text-gray-400">&copy; 2026 Docksync. Todos os direitos reservados.</p>
+    </footer>
+
+    <!-- Script do Menu Mobile -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const btnMenu = document.getElementById('btn-mobile-menu');
+            const btnClose = document.getElementById('btn-close-mobile-menu');
+            const menu = document.getElementById('mobile-menu');
+            const overlay = document.getElementById('mobile-menu-overlay');
+
+            function abrirMenu() {
+                menu.classList.add('open');
+                overlay.classList.remove('hidden');
+                document.body.style.overflow = 'hidden';
+            }
+
+            function fecharMenu() {
+                menu.classList.remove('open');
+                overlay.classList.add('hidden');
+                document.body.style.overflow = '';
+            }
+
+            if (btnMenu) btnMenu.addEventListener('click', abrirMenu);
+            if (btnClose) btnClose.addEventListener('click', fecharMenu);
+            if (overlay) overlay.addEventListener('click', fecharMenu);
+
+            // Fecha o menu ao clicar em qualquer link interno
+            if (menu) {
+                menu.querySelectorAll('a').forEach(link => {
+                    link.addEventListener('click', fecharMenu);
+                });
+            }
+        });
+    </script>
+</body>
+</html>

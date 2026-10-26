@@ -1,0 +1,10 @@
+Django>=5.0
+psycopg2-binary
+python-dotenv
+openpyxl
+pandas
+reportlab
+django-crontab
+qrcode[pil]
+whitenoise
+pypdf

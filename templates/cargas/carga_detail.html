@@ -1,0 +1,121 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto">
+    <div class="flex justify-between items-center mb-6">
+        <h1 class="text-3xl font-bold text-[#0B1A2A]">📄 Ficha do Veículo: {{ carga.chassi }}</h1>
+        <a href="{% url 'carga_list' %}" class="bg-gray-200 text-gray-700 px-4 py-2 rounded-lg font-semibold hover:bg-gray-300 transition">← Voltar</a>
+    </div>
+
+    <!-- Status Card -->
+    <div class="bg-gradient-to-r from-[#0B1A2A] to-[#1F3346] text-white p-6 rounded-xl shadow-lg mb-6">
+        <div class="grid grid-cols-2 md:grid-cols-5 gap-4 items-center">
+            <div>
+                <p class="text-xs opacity-80 uppercase">Setor Atual</p>
+                <p class="text-lg font-bold">{{ carga.setor_atual.nome|default:"-" }}</p>
+            </div>
+            <div>
+                <p class="text-xs opacity-80 uppercase">BL</p>
+                <p class="text-lg font-bold text-[#00AEEF]">{{ carga.bl|default:"-" }}</p>
+            </div>
+            <div>
+                <p class="text-xs opacity-80 uppercase">Tempo Permanência</p>
+                <p class="text-lg font-bold">{{ tempo_permanencia|default:"-" }}</p>
+            </div>
+            <div>
+                <p class="text-xs opacity-80 uppercase">Prazo</p>
+                {% if prazo_excedido %}
+                    <p class="text-lg font-bold text-red-400">🔴 Prazo Excedido</p>
+                {% else %}
+                    <p class="text-lg font-bold text-green-400">🟢 No Prazo</p>
+                {% endif %}
+            </div>
+            <div class="flex flex-col items-center justify-center bg-white rounded-lg p-2 shadow-md">
+                <img src="{% url 'gerar_qrcode_chassi' carga.chassi %}" alt="QR Code {{ carga.chassi }}" class="w-24 h-24">
+                <a href="{% url 'imprimir_etiqueta_chassi' carga.chassi %}" target="_blank" class="mt-2 text-[10px] bg-[#00AEEF] hover:bg-[#0091cc] text-white font-bold px-2 py-1 rounded transition flex items-center gap-1">
+                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
+                    Imprimir
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Grid de Informações -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+        <div class="bg-white p-6 rounded-xl shadow-md border border-gray-100">
+            <h3 class="text-xl font-bold text-[#0B1A2A] border-b pb-2 mb-4">🚗 Informações do Veículo</h3>
+            <ul class="space-y-2 text-sm">
+                <li class="flex justify-between border-b border-gray-100 pb-1"><span class="font-semibold text-gray-700">Modelo:</span> {{ carga.modelo.fabricante }} {{ carga.modelo.modelo }} ({{ carga.modelo.ano }})</li>
+                <li class="flex justify-between border-b border-gray-100 pb-1"><span class="font-semibold text-gray-700">Metragem (m²):</span> {{ carga.metragem_unitaria|floatformat:2 }}</li>
+                <li class="flex justify-between border-b border-gray-100 pb-1"><span class="font-semibold text-gray-700">Operador Portuário:</span> {{ carga.operador.nome_empresa|default:"-" }}</li>
+                <li class="flex justify-between border-b border-gray-100 pb-1"><span class="font-semibold text-gray-700">Fiel Depositário:</span> {{ carga.dono.nome_completo|default:"-" }}</li>
+                <li class="flex justify-between border-b border-gray-100 pb-1"><span class="font-semibold text-gray-700">Previsão de Saída:</span> {{ carga.manifesto.data_estimada_retirada|date:"d/m/Y"|default:"-" }}</li>
+            </ul>
+        </div>
+
+        <div class="bg-white p-6 rounded-xl shadow-md border border-gray-100">
+            <h3 class="text-xl font-bold text-[#0B1A2A] border-b pb-2 mb-4">📍 Localização</h3>
+            <div id="map" class="h-64 rounded-lg border border-gray-200 bg-gray-50"
+                 data-lat="{{ carga.latitude|default:'' }}"
+                 data-lng="{{ carga.longitude|default:'' }}"
+                 data-chassi="{{ carga.chassi }}"
+                 data-setor="{{ carga.setor_atual.nome|default:'' }}">
+                Carregando mapa...
+            </div>
+        </div>
+    </div>
+
+    <!-- Histórico -->
+    <div class="bg-white p-6 rounded-xl shadow-md border border-gray-100">
+        <h3 class="text-xl font-bold text-[#0B1A2A] border-b pb-2 mb-4">🕒 Histórico de Movimentações</h3>
+        {% if historico %}
+            <div class="space-y-3">
+                {% for mov in historico %}
+                <div class="flex justify-between items-center bg-gray-50 p-3 rounded-lg border border-gray-100">
+                    <div class="flex items-center gap-2">
+                        <span class="font-semibold {% if mov.tipo == 'CHEGADA' %}text-green-600{% elif mov.tipo == 'SAIDA' %}text-red-600{% else %}text-blue-600{% endif %}">{{ mov.get_tipo_display }}</span>
+                        <span class="text-gray-400">→</span>
+                        <span>{{ mov.setor_destino.nome|default:"-" }}</span>
+                        {% if mov.fotografia_chassi %}
+                            <a href="{{ mov.fotografia_chassi.url }}" target="_blank" class="text-[#00AEEF] underline text-xs">📷 Ver Foto</a>
+                        {% endif %}
+                    </div>
+                    <div class="text-right text-xs text-gray-400">
+                        <div>{{ mov.data_hora|date:"d/m/Y H:i" }}</div>
+                        <div class="text-gray-500">Operador: {{ mov.trabalhador.nome_completo|default:"-" }}</div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <p class="text-gray-500 text-sm">Este veículo não possui movimentações registradas.</p>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Leaflet (LOCAL) -->
+<link rel="stylesheet" href="{% static 'css/leaflet.css' %}" />
+<script src="{% static 'js/leaflet.js' %}"></script>
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        var mapElement = document.getElementById('map');
+        var lat = mapElement.getAttribute('data-lat');
+        var lng = mapElement.getAttribute('data-lng');
+        var chassi = mapElement.getAttribute('data-chassi');
+        var setor = mapElement.getAttribute('data-setor');
+
+        if (lat && lng) {
+            var map = L.map('map').setView([parseFloat(lat), parseFloat(lng)], 16);
+            L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                maxZoom: 19,
+                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+            }).addTo(map);
+            L.marker([parseFloat(lat), parseFloat(lng)]).addTo(map)
+                .bindPopup(chassi + " - " + setor);
+        } else {
+            mapElement.innerHTML = "Coordenadas não disponíveis para exibir o mapa.";
+        }
+    });
+</script>
+{% endblock %}

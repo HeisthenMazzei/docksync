@@ -1,0 +1,193 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Imprimir Etiqueta | {{ carga.chassi }}</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+        body { background: #F5F7FA; display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 20px; }
+
+        .etiqueta {
+            background: white;
+            width: 100mm;
+            padding: 6mm;
+            border: 2px solid #0B1A2A;
+            border-radius: 3mm;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .etiqueta-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 2px solid #0B1A2A;
+            padding-bottom: 3mm;
+            margin-bottom: 4mm;
+        }
+
+        .etiqueta-logo { font-size: 20px; font-weight: 900; color: #0B1A2A; }
+        .etiqueta-logo span { color: #00AEEF; }
+
+        .etiqueta-body {
+            display: flex;
+            gap: 4mm;
+            align-items: center;
+        }
+
+        .etiqueta-qr {
+            width: 40mm;
+            height: 40mm;
+            flex-shrink: 0;
+        }
+
+        .etiqueta-info { flex: 1; }
+
+        .etiqueta-info .label {
+            font-size: 7px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #64748B;
+            font-weight: 700;
+            margin-bottom: 0.5mm;
+        }
+
+        .etiqueta-info .valor {
+            font-size: 12px;
+            font-weight: 800;
+            color: #0B1A2A;
+            margin-bottom: 3mm;
+            line-height: 1.2;
+        }
+
+        .etiqueta-info .chassi {
+            font-size: 10px;
+            font-weight: 900;
+            color: #0B1A2A;
+            word-break: break-all;
+            background: #F1F5F9;
+            padding: 2mm;
+            border-radius: 1mm;
+            margin-bottom: 3mm;
+            border: 1px dashed #CBD5E1;
+        }
+
+        .etiqueta-footer {
+            border-top: 1px solid #E2E8F0;
+            padding-top: 2mm;
+            margin-top: 3mm;
+            font-size: 7px;
+            color: #94A3B8;
+            text-align: center;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .acoes {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            display: flex;
+            gap: 10px;
+            z-index: 1000;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 10px;
+            font-weight: 700;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.2s;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-imprimir {
+            background: #00AEEF;
+            color: white;
+            box-shadow: 0 4px 12px rgba(0, 174, 239, 0.4);
+        }
+
+        .btn-imprimir:hover { background: #0091cc; }
+
+        .btn-voltar {
+            background: white;
+            color: #64748B;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-voltar:hover { background: #F1F5F9; }
+
+        @media print {
+            body {
+                background: white;
+                padding: 0;
+                min-height: auto;
+                display: block;
+            }
+            .etiqueta {
+                box-shadow: none;
+                margin: 0;
+                page-break-inside: avoid;
+            }
+            .acoes { display: none !important; }
+            @page {
+                size: auto;
+                margin: 5mm;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ETIQUETA -->
+    <div class="etiqueta">
+        <div class="etiqueta-header">
+            <div class="etiqueta-logo">V<span>Ports</span></div>
+            <div style="font-size: 8px; color: #64748B; text-transform: uppercase; font-weight: 600; letter-spacing: 1px;">
+                Rastreamento
+            </div>
+        </div>
+
+        <div class="etiqueta-body">
+            <img src="{% url 'gerar_qrcode_chassi' carga.chassi %}" alt="QR {{ carga.chassi }}" class="etiqueta-qr">
+
+            <div class="etiqueta-info">
+                <div class="label">Chassi</div>
+                <div class="chassi">{{ carga.chassi }}</div>
+
+                <div class="label">Modelo / Ano</div>
+                <div class="valor">
+                    {% if carga.modelo %}
+                        {{ carga.modelo.fabricante }} {{ carga.modelo.modelo }}<br>
+                        <span style="font-size: 10px; color: #64748B;">Ano: {{ carga.modelo.ano|default:"-" }}</span>
+                    {% else %}
+                        -
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="etiqueta-footer">
+            Docksync · Escaneie para ver os detalhes
+        </div>
+    </div>
+
+    <!-- BOTÕES DE AÇÃO (não saem na impressão) -->
+    <div class="acoes">
+        <a href="javascript:history.back()" class="btn btn-voltar">
+            ← Voltar
+        </a>
+        <button onclick="window.print()" class="btn btn-imprimir">
+            🖨️ Imprimir
+        </button>
+    </div>
+
+</body>
+</html>

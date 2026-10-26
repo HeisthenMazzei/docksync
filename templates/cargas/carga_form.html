@@ -1,0 +1,91 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto bg-white p-8 rounded-xl shadow-md border border-gray-100">
+    <h2 class="text-2xl font-bold text-[#0B1A2A] mb-6">➕ Adicionar Nova Carga (Veículo)</h2>
+    
+    <form method="post" class="space-y-4">
+        {% csrf_token %}
+        
+        <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Nº BL (Conhecimento de Embarque)</label>
+            <input type="text" name="bl" required class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-[#00AEEF] outline-none">
+        </div>
+
+        <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Chassi do Veículo</label>
+            <input type="text" name="chassi" required class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-[#00AEEF] outline-none">
+        </div>
+        
+        <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Manifesto</label>
+            <select name="manifesto" required class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-[#00AEEF] outline-none">
+                <option value="">-- Selecione o Manifesto --</option>
+                {% for manifesto in manifestos %}
+                <option value="{{ manifesto.id }}">Manifesto {{ manifesto.id }} - {{ manifesto.viagem.numero_viagem }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Operador Portuário</label>
+            <select name="operador" class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-[#00AEEF] outline-none">
+                <option value="">-- Selecione o Operador --</option>
+                {% for operador in operadores %}
+                <option value="{{ operador.id }}">{{ operador.nome_empresa }} ({{ operador.cnpj }})</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Fiel Depositário</label>
+            <select name="dono" required class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-[#00AEEF] outline-none">
+                <option value="">-- Selecione o Fiel --</option>
+                {% for dono in donos %}
+                <option value="{{ dono.id }}">{{ dono.nome_completo }} (Mat: {{ dono.matricula }})</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Modelo de Veículo</label>
+            <select name="modelo" id="id_modelo" required class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-[#00AEEF] outline-none">
+                <option value="">-- Selecione o Modelo --</option>
+                {% for modelo in modelos %}
+                <option value="{{ modelo.id }}" data-metragem="{{ modelo.metragem_m2 }}">
+                    {{ modelo.fabricante }} {{ modelo.modelo }} ({{ modelo.ano }}) - {{ modelo.metragem_m2 }} m²
+                </option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Metragem Ocupada (m²)</label>
+            <input type="number" step="0.01" name="metragem_unitaria" id="id_metragem" readonly required class="w-full border border-gray-300 rounded-lg px-4 py-2 bg-gray-100 text-gray-500 focus:outline-none" placeholder="Selecione o modelo para calcular">
+        </div>
+
+        <div class="flex gap-4 pt-4">
+            <button type="submit" class="btn-Docksync px-6 py-3 rounded-lg font-bold shadow-md transition">Salvar Carga</button>
+            <a href="{% url 'carga_list' %}" class="px-6 py-3 rounded-lg font-bold text-gray-500 hover:bg-gray-100 transition">Cancelar</a>
+        </div>
+    </form>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const modeloSelect = document.getElementById('id_modelo');
+        const metragemInput = document.getElementById('id_metragem');
+
+        modeloSelect.addEventListener('change', function() {
+            const selectedOption = modeloSelect.options[modeloSelect.selectedIndex];
+            const metragem = selectedOption.getAttribute('data-metragem');
+            
+            if (metragem) {
+                metragemInput.value = metragem;
+            } else {
+                metragemInput.value = '';
+            }
+        });
+    });
+</script>
+{% endblock %}

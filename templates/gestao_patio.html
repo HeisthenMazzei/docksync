@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto">
+    
+    <!-- Título sem emoji, com ícone SVG no padrão Docksync -->
+    <h1 class="text-2xl font-bold text-[#0B1A2A] mb-6 flex items-center gap-3">
+        <svg class="w-8 h-8 text-[#00AEEF]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 17l6-6 4 4 6-6 2 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6zM9 7a2 2 0 110-4 2 2 0 010 4z"/>
+        </svg>
+        Gestão de Pátio
+    </h1>
+    
+    {% if patio_modelo %}
+    <!-- Card principal com gradiente elegante -->
+    <div class="bg-gradient-to-r from-[#0B1A2A] to-[#1F3346] text-white p-6 rounded-2xl shadow-lg border border-[#1F3346]">
+        <div class="flex flex-col lg:flex-row justify-between items-center gap-6">
+            
+            <div class="text-center lg:text-left shrink-0">
+                <h3 class="text-3xl font-bold mb-1">{{ patio_modelo.nome }}</h3>
+                <p class="text-sm font-medium text-gray-400">Código: {{ patio_modelo.codigo }}</p>
+            </div>
+
+            <!-- Grade uniforme com largura fixa para cada métrica -->
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-6 text-center">
+                <div class="flex flex-col justify-end min-w-[80px]">
+                    <p class="text-3xl font-extrabold text-[#00AEEF]">{{ patio_modelo.quantidade_cargas|default:0 }}</p>
+                    <p class="text-xs font-medium tracking-wide text-gray-400 uppercase mt-1">Carros</p>
+                </div>
+                <div class="flex flex-col justify-end min-w-[80px]">
+                    <p class="text-3xl font-extrabold text-red-400">{{ patio_modelo.prazo_excedido|default:0 }}</p>
+                    <p class="text-xs font-medium tracking-wide text-gray-400 uppercase mt-1">Prazo Excedido</p>
+                </div>
+                <div class="flex flex-col justify-end min-w-[80px]">
+                    <p class="text-3xl font-extrabold">{{ patio_modelo.metragem_ocupada|default:"0"|floatformat:1 }}<span class="text-lg font-medium">m²</span></p>
+                    <p class="text-xs font-medium tracking-wide text-gray-400 uppercase mt-1">Ocupação</p>
+                </div>
+                <div class="flex flex-col justify-end min-w-[80px]">
+                    <p class="text-3xl font-extrabold">{{ patio_modelo.capacidade_metragem }}<span class="text-lg font-medium">m²</span></p>
+                    <p class="text-xs font-medium tracking-wide text-gray-400 uppercase mt-1">Total</p>
+                </div>
+            </div>
+
+            <div class="shrink-0">
+                <a href="{% url 'subpatios_list' %}" class="btn-Docksync px-6 py-3 rounded-lg text-sm font-semibold shadow-md block text-center">
+                    Ver Subpátios
+                </a>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

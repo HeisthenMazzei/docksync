@@ -1,0 +1,64 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto bg-white p-8 rounded-xl shadow-md border border-gray-100">
+    <h2 class="text-2xl font-bold text-[#0B1A2A] mb-6">
+        {% if is_edit %}✏️ Editar Usuário{% else %}➕ Cadastrar Novo Usuário{% endif %}
+    </h2>
+    
+    <form method="post" class="space-y-4">
+        {% csrf_token %}
+        
+        <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Nome de Usuário (Login)</label>
+            <input type="text" name="username" value="{{ form.username.value|default:'' }}" required class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-[#00AEEF] outline-none">
+        </div>
+
+        <div class="grid grid-cols-2 gap-4">
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Nome</label>
+                <input type="text" name="first_name" value="{{ form.first_name.value|default:'' }}" class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-[#00AEEF] outline-none">
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Sobrenome</label>
+                <input type="text" name="last_name" value="{{ form.last_name.value|default:'' }}" class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-[#00AEEF] outline-none">
+            </div>
+        </div>
+
+        <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">E-mail</label>
+            <input type="email" name="email" value="{{ form.email.value|default:'' }}" class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-[#00AEEF] outline-none">
+        </div>
+
+        {% if not is_edit %}
+        <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Senha</label>
+            <input type="password" name="password" required class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-[#00AEEF] outline-none">
+        </div>
+        {% else %}
+        <!-- CAMPO CORRIGIDO: Senha opcional na edição -->
+        <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Nova Senha (Deixe em branco para não alterar)</label>
+            <input type="password" name="nova_senha" class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-[#00AEEF] outline-none">
+        </div>
+        {% endif %}
+
+        <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Perfil de Acesso</label>
+            <select name="grupo" class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-[#00AEEF] outline-none">
+                <option value="">-- Selecione o Perfil --</option>
+                {% for grupo in grupos %}
+                    <option value="{{ grupo.id }}" {% if object and object.groups.all.0.id == grupo.id %}selected{% endif %}>{{ grupo.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="flex gap-4 pt-4">
+            <button type="submit" class="btn-Docksync px-6 py-3 rounded-lg font-bold shadow-md transition">
+                {% if is_edit %}Salvar Alterações{% else %}Salvar Usuário{% endif %}
+            </button>
+            <a href="{% url 'usuario_list' %}" class="px-6 py-3 rounded-lg font-bold text-gray-500 hover:bg-gray-100 transition">Cancelar</a>
+        </div>
+    </form>
+</div>
+{% endblock %}
