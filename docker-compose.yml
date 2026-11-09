@@ -1,37 +1,32 @@
 version: '3.8'
+
 services:
   db:
     image: postgres:15
-    volumes:
-      - postgres_data:/var/lib/postgresql/data/
     environment:
-      - POSTGRES_DB=Docksync_db
-      - POSTGRES_USER=Docksync_user
-      - POSTGRES_PASSWORD=secure_password
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U Docksync_user"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
+      POSTGRES_DB: Docksync_db
+      POSTGRES_USER: Docksync_user
+      POSTGRES_PASSWORD: secure_password
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
 
   web:
     build: .
     command: python manage.py runserver 0.0.0.0:8000
     volumes:
       - .:/app
-      - media_volume:/app/media
     ports:
       - "8000:8000"
+    depends_on:
+      - db
     environment:
       - DJANGO_DEBUG=True
       - POSTGRES_DB=Docksync_db
       - POSTGRES_USER=Docksync_user
       - POSTGRES_PASSWORD=secure_password
       - POSTGRES_HOST=db
-    depends_on:
-      db:
-        condition: service_healthy
 
 volumes:
   postgres_data:
-  media_volume:

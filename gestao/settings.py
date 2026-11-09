@@ -4,20 +4,20 @@ Django settings for gestao project.
 import os
 from pathlib import Path
 
+# Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-SECRET_KEY = os.getenv('DJANGO_SECRET_KEY', 'django-insecure-fallback-key-for-local')
+SECRET_KEY = os.getenv('DJANGO_SECRET_KEY', 'django-insecure-fallback-key-for-local-and-pythonanywhere')
 
 DEBUG = os.getenv('DJANGO_DEBUG', 'True') == 'True'
 
+# Permite acesso local e no PythonAnywhere (troque SEU_USUARIO pelo seu nome de usuário)
 ALLOWED_HOSTS = ['*']
 
 CSRF_TRUSTED_ORIGINS = [
-    'https://*.ngrok-free.app',
-    'https://*.ngrok-free.dev',
-    'https://*.ngrok.io',
-    'https://*.ngrok.app',
     'https://*.pythonanywhere.com',
+    'https://*.ngrok-free.app',
+    'https://*.ngrok.io',
 ]
 
 INSTALLED_APPS = [
@@ -53,7 +53,7 @@ ROOT_URLCONF = 'gestao.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': ['/home/HeisthenMazzei/vport_mvp/templates'],
+        'DIRS': [BASE_DIR / 'templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -69,7 +69,7 @@ TEMPLATES = [
 WSGI_APPLICATION = 'gestao.wsgi.application'
 
 # ==========================================
-# BANCO DE DADOS
+# BANCO DE DADOS (Docker = Postgres | PythonAnywhere = SQLite)
 # ==========================================
 USE_SQLITE = os.getenv('USE_SQLITE', 'False') == 'True'
 
@@ -77,15 +77,15 @@ if USE_SQLITE:
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.sqlite3',
-            'NAME': '/home/HeisthenMazzei/vport_mvp/db.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
         }
     }
 else:
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.postgresql',
-            'NAME': os.getenv('POSTGRES_DB', 'gestao_db'),
-            'USER': os.getenv('POSTGRES_USER', 'gestao_user'),
+            'NAME': os.getenv('POSTGRES_DB', 'Docksync_db'),
+            'USER': os.getenv('POSTGRES_USER', 'Docksync_user'),
             'PASSWORD': os.getenv('POSTGRES_PASSWORD', 'secure_password'),
             'HOST': os.getenv('POSTGRES_HOST', 'db'),
             'PORT': '5432',
@@ -108,8 +108,8 @@ USE_TZ = True
 # ARQUIVOS ESTÁTICOS E DE MÍDIA
 # ==========================================
 STATIC_URL = '/static/'
-STATIC_ROOT = '/home/HeisthenMazzei/vport_mvp/staticfiles'
-STATICFILES_DIRS = ['/home/HeisthenMazzei/vport_mvp/static']
+STATIC_ROOT = BASE_DIR / 'staticfiles'
+STATICFILES_DIRS = [BASE_DIR / 'static']
 
 STORAGES = {
     "default": {
@@ -121,7 +121,7 @@ STORAGES = {
 }
 
 MEDIA_URL = '/media/'
-MEDIA_ROOT = '/home/HeisthenMazzei/vport_mvp/media'
+MEDIA_ROOT = BASE_DIR / 'media'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
