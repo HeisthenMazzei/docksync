@@ -25,36 +25,38 @@ def gerar_coordenada():
 
 
 # ============================================================
-# DADOS DO LINEUP Docksync (atualizado em 20/10/2026)
+# DADOS DO LINEUP Docksync (Nova Lineup)
 # ============================================================
 LINEUP_DATA = [
-    ("2026041104", "202", "PRODIGY", "Aprovada", "02/10/2026 23:30", "13/10/2026 11:10", "24/10/2026 07:55", "ORION RODOS MARITIMA E PORTUÁRIA LTDA"),
-    ("2026046784", "102", "SKANDI NITEROI", "Aprovada", "06/10/2026 07:00", "06/10/2026 09:35", "22/10/2026 07:00", "WILSON SONS SHIPPING SERVICES LTDA"),
-    ("2026045038", "203", "GREEN TAICANG", "Aprovada", "06/10/2026 09:00", "13/10/2026 17:20", "20/10/2026 08:59", "TRANSHIPPING AGENCIAMENTO MARITIMO LTDA."),
-    ("2026048156", "905", "BLUE NEPTUNE", "Aprovada", "13/10/2026 00:15", "14/10/2026 00:30", "24/10/2026 13:06", "ORION RODOS MARITIMA E PORTUÁRIA LTDA"),
-    ("2026047733", "207", "ML SWALLOW", "Aprovada", "16/10/2026 08:00", "18/10/2026 17:45", "24/10/2026 23:00", "WILSON SONS SHIPPING SERVICES LTDA"),
-    ("2026049405", "906", "SKANDI RECIFE", "Aprovada", "17/10/2026 00:00", "17/10/2026 08:05", "20/10/2026 08:00", "WILSON SONS SHIPPING SERVICES LTDA"),
-    ("2026046732", "103", "SKANDI VITORIA", "Aprovada", "19/10/2026 11:59", "19/10/2026 13:20", "24/10/2026 07:00", "WILSON SONS SHIPPING SERVICES LTDA"),
-    ("2026047667", "203", "GREEN ITAJAI", "Aprovada", "17/10/2026 18:30", "20/10/2026 09:59", "24/10/2026 11:06", "TRANSHIPPING AGENCIAMENTO MARITIMO LTDA."),
-    ("2026047624", "207", "LARGO ENDEAVOR", "Incluída", "19/10/2026 09:42", "25/10/2026 00:00", "27/10/2026 09:24", "ATLANTIC AGENCIA DE NAVEGACAO LTDA ME"),
-    ("2026049040", "204", "LOG-IN DISCOVERY (REB S/L)", "Aprovada", "20/10/2026 07:00", "20/10/2026 10:59", "22/10/2026 23:51", "MSC MEDITERRANEAN SHIPPING DO BRASIL LTDA 02.378.779/0009-66"),
-    ("2026049073", "203", "ZHONG YUAN HAI YUN JIN QU", "Incluída", "20/10/2026 09:00", "22/10/2026 10:00", "23/10/2026 11:00", "TRANSHIPPING AGENCIAMENTO MARITIMO LTDA."),
-    ("2026049890", "101", "WATERBUCK (REB)", "Incluída", "21/10/2026 07:00", "21/10/2026 08:00", "21/10/2026 19:00", "PROAMAR SERVIÇOS DE DESPACHOS MARÍTIMOS LTDA"),
-    ("2026049444", "102", "TS PEREGRINO", "Incluída", "22/10/2026 06:00", "22/10/2026 07:00", "22/10/2026 08:00", "LOTUS AGENCIA MARITIMA E OPERADORA PORTUARIA LTDA"),
-    ("2026049445", "102", "BALSA TS6", "Incluída", "22/10/2026 06:00", "22/10/2026 07:00", "23/10/2026 08:00", "LOTUS AGENCIA MARITIMA E OPERADORA PORTUARIA LTDA"),
-    ("659", "102", "AMAZONAS", "Incluída", "22/10/2026 07:00", "22/10/2026 08:00", "26/10/2026 09:30", "MARINHA DE GUERRA"),
-    ("2026044955", "201", "DAHLIA", "Incluída", "25/10/2026 08:00", "25/10/2026 09:00", "26/10/2026 20:27", "HMS BRASIL AGENCIAMENTOS MARITIMOS LTDA"),
-    ("2026049513", "201", "MUROVDAG", "Incluída", "23/10/2026 13:00", "23/10/2026 14:00", "24/10/2026 07:43", "WILSON SONS SHIPPING SERVICES LTDA"),
-    ("2026048558", "201", "GULLWING", "Incluída", "26/10/2026 05:00", "26/10/2026 21:27", "29/10/2026 18:18", "ORION RODOS MARITIMA E PORTUÁRIA LTDA"),
-    ("2026049174", "202", "NOVA", "Incluída", "25/10/2026 12:00", "27/10/2026 17:21", "06/11/2026 13:09", "WILHELMSEN PORT SERVICES BRASIL LTDA"),
-    ("2026044965", "202", "CORAL ISLAND", "Incluída", "25/10/2026 06:00", "25/10/2026 07:00", "27/10/2026 09:06", "SEATRADE OPERADORES PORTUARIOS LTDA"),
-    ("2026047699", "202", "TORRENS", "Incluída", "24/10/2026 07:00", "24/10/2026 08:55", "25/10/2026 00:33", "WILHELMSEN PORT SERVICES BRASIL LTDA"),
-    ("2026049948", "204", "LOG-IN JACARANDA", "Incluída", "24/10/2026 12:00", "24/10/2026 12:01", "25/10/2026 14:00", "MSC MEDITERRANEAN SHIPPING DO BRASIL LTDA"),
-    ("2026045097", "207", "GRANDE AMBURGO", "Incluída", "26/10/2026 07:00", "27/10/2026 10:24", "27/10/2026 16:39", "LACHMANN AGENCIA MARITIMA LTDA"),
-    ("2026047736", "501", "JORGE AMADO", "Incluída", "24/10/2026 02:00", "24/10/2026 03:00", "24/10/2026 04:00", "LACHMANN AGENCIA MARITIMA LTDA"),
-    ("2026049402", "905", "MAERSK KATALIN", "Incluída", "21/10/2026 00:00", "24/10/2026 14:06", "29/10/2026 21:24", "LACHMANN AGENCIA MARITIMA LTDA"),
-    ("2026049869", "905", "VORIAS", "Incluída", "24/10/2026 00:00", "25/10/2026 16:06", "01/11/2026 22:21", "LACHMANN AGENCIA MARITIMA LTDA"),
-    ("593", "909", "NORMAND COMMANDER", "Incluída", "25/10/2026 07:00", "25/10/2026 08:00", "25/10/2026 09:00", "SOLANA AGENCIA MARITIMA LTDA"),
+    ("2026049331", "103", "INTEGRADOR", "Aprovada", "03/11/2026 06:00", "09/11/2026 05:05", "09/11/2026 21:30", "ORION RODOS MARITIMA E PORTUÁRIA LTDA"),
+    ("2026051571", "203", "GREEN PORTOCEL", "Aprovada", "03/11/2026 08:00", "05/11/2026 13:15", "09/11/2026 22:04", "TRANSHIPPING AGENCIAMENTO MARITIMO LTDA."),
+    ("2026050064", "202", "PACIFICA", "Aprovada", "04/11/2026 15:30", "06/11/2026 10:50", "10/11/2026 10:25", "ATLANTIC AGENCIA DE NAVEGACAO LTDA ME"),
+    ("2026044969", "906", "SAPURA DIAMANTE (BAND. GREYLIST PARIS MOU)", "Aprovada", "07/11/2026 07:00", "07/11/2026 10:40", "10/11/2026 21:40", "LOTUS AGENCIA MARITIMA E OPERADORA PORTUARIA LTDA"),
+    ("2026052331", "502", "MANTA BEYOGLU", "Aprovada", "07/11/2026 15:00", "08/11/2026 13:33", "10/11/2026 13:30", "LACHMANN AGENCIA MARITIMA LTDA"),
+    ("2026052901", "204", "LOG-IN PANTANAL (REB)", "Aprovada", "08/11/2026 23:00", "09/11/2026 00:31", "10/11/2026 02:34", "MSC MEDITERRANEAN SHIPPING DO BRASIL LTDA"),
+    ("2026053523", "102", "TS ARROJADO", "Aprovada", "09/11/2026 06:00", "09/11/2026 09:15", "10/11/2026 13:00", "LOTUS AGENCIA MARITIMA E OPERADORA PORTUARIA LTDA"),
+    ("2026053529", "102", "TS 5", "Aprovada", "09/11/2026 06:00", "09/11/2026 09:15", "10/11/2026 13:00", "LOTUS AGENCIA MARITIMA E OPERADORA PORTUARIA LTDA"),
+    ("2026051368", "203", "GREEN RIO DE JANEIRO", "Aprovada", "02/11/2026 08:30", "10/11/2026 14:23", "15/11/2026 05:51", "TRANSHIPPING AGENCIAMENTO MARITIMO LTDA."),
+    ("2026050643", "101", "BAR", "Incluída", "17/11/2026 00:00", "17/11/2026 01:00", "19/11/2026 10:24", "ORION RODOS MARITIMA E PORTUÁRIA LTDA"),
+    ("2026053006", "101", "ISLAND ENFORCER (REB)", "Incluída", "10/11/2026 05:00", "10/11/2026 05:30", "11/11/2026 08:00", "PROAMAR SERVIÇOS DE DESPACHOS MARÍTIMOS LTDA"),
+    ("2026053060", "201", "COSCO SHIPPING XING WANG", "Incluída", "18/11/2026 17:00", "18/11/2026 18:00", "29/11/2026 13:48", "WILHELMSEN PORT SERVICES BRASIL LTDA"),
+    ("2026052741", "201", "PAX MUNDI", "Incluída", "18/11/2026 01:00", "19/11/2026 05:59", "22/11/2026 22:39", "UNIPORT AGÊNCIA MARÍTIMA LTDA EPP"),
+    ("2026053169", "201", "PEACE BAND", "Incluída", "13/11/2026 10:00", "13/11/2026 11:00", "16/11/2026 00:32", "WILSON SONS SHIPPING SERVICES LTDA"),
+    ("2026052428", "201", "NORDIC LUEBECK", "Incluída", "20/11/2026 12:00", "20/11/2026 13:00", "23/11/2026 06:43", "GEM SHIPPING LTDA"),
+    ("2026050725", "202", "GRANDE SAN PAOLO", "Incluída", "20/11/2026 07:00", "20/11/2026 08:00", "20/11/2026 18:27", "LACHMANN AGENCIA MARITIMA LTDA"),
+    ("2026051273", "202", "GRANDE GUINEA", "Incluída", "20/11/2026 06:00", "22/11/2026 23:39", "23/11/2026 09:03", "LACHMANN AGENCIA MARITIMA LTDA"),
+    ("2026053426", "202", "FEDERAL RUHR", "Incluída", "09/11/2026 16:30", "10/11/2026 11:45", "16/11/2026 08:19", "WILHELMSEN PORT SERVICES BRASIL LTDA"),
+    ("2026052449", "202", "NIKOS", "Incluída", "14/11/2026 23:00", "16/11/2026 07:59", "21/11/2026 03:47", "Amart Services Consultoria, Agenciamento Marítimo e Transporte Ltda"),
+    ("2026053141", "202", "POLARIS LEADER", "Incluída", "20/11/2026 04:00", "20/11/2026 04:01", "21/11/2026 03:00", "LACHMANN AGENCIA MARITIMA LTDA"),
+    ("2026051605", "203", "GREEN GUANGZHOU", "Incluída", "12/11/2026 12:00", "15/11/2026 06:51", "18/11/2026 16:00", "TRANSHIPPING AGENCIAMENTO MARITIMO LTDA."),
+    ("2026052980", "204", "LOG-IN DISCOVERY (REB S/L)", "Aprovada", "09/11/2026 23:30", "10/11/2026 09:25", "12/11/2026 15:25", "MSC MEDITERRANEAN SHIPPING DO BRASIL LTDA 02.378.779/0009-66"),
+    ("2026053097", "207", "MICHIGAN HIGHWAY", "Incluída", "14/11/2026 18:00", "16/11/2026 01:32", "16/11/2026 22:22", "UNIMAR AGENCIAMENTOS MARITIMOS LTDA"),
+    ("2026053516", "207", "BOSPORUS HIGHWAY", "Incluída", "17/11/2026 06:00", "17/11/2026 07:00", "17/11/2026 07:00", "UNIMAR AGENCIAMENTOS MARITIMOS LTDA"),
+    ("2026049799", "207", "YU AN", "Incluída", "12/11/2026 00:00", "12/11/2026 01:00", "14/11/2026 22:00", "ORION RODOS MARITIMA E PORTUÁRIA LTDA"),
+    ("2026052325", "207", "MERMAID ACE", "Incluída", "10/11/2026 06:00", "10/11/2026 11:25", "10/11/2026 23:00", "Rochamar Agência Maritima S/A"),
+    ("2026052435", "905", "MAERSK KATALIN", "Incluída", "14/11/2026 00:00", "14/11/2026 01:00", "17/11/2026 22:00", "LACHMANN AGENCIA MARITIMA LTDA"),
+    ("2026052166", "905", "AFRICAN MACAW", "Incluída", "18/11/2026 01:00", "18/11/2026 02:00", "24/11/2026 00:56", "UNIPORT AGÊNCIA MARÍTIMA LTDA EPP"),
+    ("722", "909", "BRAM BRAVO", "Incluída", "10/11/2026 08:00", "10/11/2026 08:30", "10/11/2026 20:00", "PROAMAR SERVIÇOS DE DESPACHOS MARÍTIMOS LTDA"),
 ]
 
 
@@ -109,7 +111,7 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         random.seed(42)
 
-        self.stdout.write(self.style.MIGRATE_HEADING('\n=== SEED Docksync — Lineup Out/2026 ===\n'))
+        self.stdout.write(self.style.MIGRATE_HEADING('\n=== SEED Docksync — Lineup Nova ===\n'))
 
         # 1. OPERADORES
         self.stdout.write('[1/7] Criando Operadores Portuários...')
@@ -152,7 +154,6 @@ class Command(BaseCommand):
             else:
                 status = 'AGUARDANDO_CHEGADA'
 
-            # Sentido: 60% descarga (importação), 40% carga (exportação)
             sentido = 'DESCARGA' if random.random() < 0.6 else 'CARGA'
 
             viagem, _ = Viagem.objects.update_or_create(
@@ -298,7 +299,6 @@ class Command(BaseCommand):
                 }
             )
 
-            # Se o manifesto já tem cargas, pula criação mas ajusta quantidade_prevista
             if manifesto.cargas.exists():
                 self.stdout.write(self.style.WARNING(f'    → Manifesto #{manifesto.id} já tem cargas. Ajustando quantidade_prevista.'))
                 total_existente = manifesto.cargas.count()
@@ -350,7 +350,6 @@ class Command(BaseCommand):
             manifesto.metragem_total = round(total_metragem_man, 2)
             manifesto.save()
 
-            # AJUSTA quantidade_prevista
             sorteio = random.random()
             if sorteio < 0.60:
                 viagem.quantidade_prevista = total_veiculos_man
@@ -367,11 +366,13 @@ class Command(BaseCommand):
             ))
             total_cargas += total_veiculos_man
 
-            # ----- MOVIMENTAÇÕES (com GPS) -----
+            # ----- MOVIMENTAÇÕES COM DATAS RECENTES -----
             for carga in cargas_criadas:
                 destino = random.choice(subpatios)
                 trab = random.choice(trabalhadores)
-                dt_chegada = base_dt + timedelta(minutes=random.randint(0, 180))
+                
+                # Força a chegada a ser entre 10 e 12 dias atrás
+                dt_chegada = agora - timedelta(days=random.randint(10, 12), hours=random.randint(1, 24))
                 lat, lng = gerar_coordenada()
 
                 try:
@@ -389,16 +390,17 @@ class Command(BaseCommand):
                     self.stdout.write(self.style.ERROR(f'    Erro CHEGADA: {e}'))
 
             for carga in cargas_criadas:
-                if random.random() < 0.30:
+                if random.random() < 0.40:
                     atual = carga.setor_atual
                     if not atual:
                         continue
                     candidatos = [s for s in subpatios if s != atual] or subpatios
                     novo = random.choice(candidatos)
                     trab = random.choice(trabalhadores)
-                    dt_interna = dt_chegada + timedelta(days=random.randint(1, 7), hours=random.randint(0, 12))
-                    if dt_interna > agora:
-                        dt_interna = agora - timedelta(hours=random.randint(1, 24))
+                    
+                    # Força a interna a ser entre 5 e 8 dias atrás
+                    dt_interna = agora - timedelta(days=random.randint(5, 8), hours=random.randint(0, 12))
+                    
                     lat, lng = gerar_coordenada()
                     try:
                         criar_movimentacao_com_data(
@@ -414,14 +416,15 @@ class Command(BaseCommand):
                         self.stdout.write(self.style.ERROR(f'    Erro INTERNA: {e}'))
 
             for carga in cargas_criadas:
-                if random.random() < 0.12:
+                if random.random() < 0.30: # 30% chance de ter saido
                     atual = carga.setor_atual
                     if not atual:
                         continue
                     trab = random.choice(trabalhadores)
-                    dt_saida = dt_chegada + timedelta(days=random.randint(3, 20), hours=random.randint(0, 20))
-                    if dt_saida > agora:
-                        dt_saida = agora - timedelta(hours=random.randint(1, 48))
+                    
+                    # Força a saída a ser entre 1 e 4 dias atrás (para o gráfico)
+                    dt_saida = agora - timedelta(days=random.randint(1, 4), hours=random.randint(0, 20))
+                    
                     try:
                         criar_movimentacao_com_data(
                             carga=carga, tipo='SAIDA',
@@ -436,9 +439,18 @@ class Command(BaseCommand):
             self.stdout.write(self.style.SUCCESS(f'    → Movimentações acumuladas: {total_mov}'))
 
         # ============================================================
-        # AJUSTE FINAL: viagens SEM manifesto ganham quantidade_prevista
+        # AJUSTE FINAL: viagens SEM manifesto e previsões futuras
         # ============================================================
         self.stdout.write(self.style.MIGRATE_HEADING('\n=== AJUSTE FINAL ===\n'))
+        
+        # Força 5 viagens para o status "Aguardando Chegada" para popular o Card
+        viagens_para_previsao = list(Viagem.objects.all().order_by('?')[:5])
+        for v in viagens_para_previsao:
+            v.status = 'AGUARDANDO_CHEGADA'
+            v.data_prevista_chegada = hoje + timedelta(days=random.randint(2, 15))
+            v.quantidade_prevista = random.randint(150, 350)
+            v.save()
+
         viagens_sem_manifesto = Viagem.objects.filter(manifestos__isnull=True)
         for v in viagens_sem_manifesto:
             if not v.quantidade_prevista or v.quantidade_prevista == 0:
